@@ -1,34 +1,23 @@
 import axios from 'axios';
 
-// This is the base URL where your Django server is running locally.
-// Adjust the port (8000) or URL path if yours is different!
-const BASE_URL = 'http://localhost:8000/api'; 
+const BASE_URL = 'http://localhost:8000/api';
 
 export const apiService = {
-    // 1. Fetch all patients (Replacing mockDb fetch)
-    getPatients: async () => {
-        try {
-            const response = await axios.get(`${BASE_URL}/patients/`);
-            return response.data;
-        } catch (error) {
-            console.error("Error fetching patient records:", error);
-            throw error; 
-        }
-    },
+  // 1. Core Patient Setup
+  getPatients: async () => (await axios.get(`${BASE_URL}/patients/`)).data,
+  registerPatient: async (data) => (await axios.post(`${BASE_URL}/patients/`, data)).data,
+  newAdmission: async (uhid) => (await axios.post(`${BASE_URL}/patients/${uhid}/new_admission/`)).data,
 
-// 2. Register a new patient
-    registerPatient: async (patientData) => {
-        try {
-            const response = await axios.post(`${BASE_URL}/patients/`, patientData);
-            return response.data;
-        } catch (error) {
-            // 👇 THIS IS THE NEW CONSOLE LOG 👇
-            if (error.response && error.response.data) {
-                console.error("Django rejected the data because:", error.response.data);
-            } else {
-                console.error("Error registering new patient:", error);
-            }
-            throw error;
-        }
-    }
+  // 2. Fetch Master Data for Dropdowns
+  getServiceMaster: async () => (await axios.get(`${BASE_URL}/service-master/`)).data,
+
+  // 3. Clinical Actions (Requires admNo in body)
+  updateMedicalHistory: async (uhid, admNo, medicalData) =>
+    (await axios.patch(`${BASE_URL}/patients/${uhid}/update_medical/`, { admNo, medicalData })).data,
+  addService: async (uhid, admNo, serviceData) =>
+    (await axios.post(`${BASE_URL}/patients/${uhid}/add_service/`, { admNo, serviceData })).data,
+  dischargePatient: async (uhid, admNo, dischargeData) =>
+    (await axios.patch(`${BASE_URL}/patients/${uhid}/discharge/`, { admNo, dischargeData })).data,
+  updateBilling: async (uhid, admNo, billingData) =>
+    (await axios.patch(`${BASE_URL}/patients/${uhid}/update_billing/`, { admNo, billingData })).data,
 };

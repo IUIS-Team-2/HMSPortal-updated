@@ -22,7 +22,7 @@ export default function LoginPage({ onLogin }) {
     }
 
     // Logic to find user manually by ID/Username
-    const user = USERS.find(u => u.id.toLowerCase() === userId.toLowerCase().trim());
+    const allUsers = (() => { try { const s = localStorage.getItem("sangi_users"); return s ? JSON.parse(s) : USERS; } catch { return USERS; } })(); const user = allUsers.find(u => u.id.toLowerCase() === userId.toLowerCase().trim());
     
     if (!user || user.password !== password) { 
       setErr("Invalid User ID or password"); 

@@ -5,6 +5,7 @@ import { fmtDT, fmtDate } from "../utils/helpers";
 import { Ico, IC } from "../components/ui/Icons";
 import { statusBadge } from "../components/ui/SharedUI";
 import { apiService } from '../services/apiService';
+import { downloadAdmissionNote } from './MedicalHistoryPage';
 
 export default function PatientsHistoryPage({db, locId, onBack, onDischarge, onGenerateBill, onSetExpectedDod, onViewPatient, onSaveMedHistory}){
   const loc = LOCATIONS.find(l => l.id === locId);
@@ -52,13 +53,20 @@ export default function PatientsHistoryPage({db, locId, onBack, onDischarge, onG
 
   const downloadExcel = () => {
     const data = filtered.map((r, i) => ({
-      "SR. NO": i + 1,
+      "SR.NO": i + 1,
       "PATIENT NAME": r.patientName,
-      "UHID": r.uhid,
-      "ADM NO": "Adm #" + r.admNo,
-      "DATE OF ADMISSION": r.doa ? fmtDT(r.doa) : "",
-      "EXPECTED DISCHARGE": r.admObj.discharge?.expectedDod ? fmtDate(r.admObj.discharge.expectedDod) : "",
-      "DATE OF DISCHARGE": r.dod ? fmtDT(r.dod) : "",
+      "AGE/G": (r.patientObj?.ageYY ? r.patientObj.ageYY + " Yrs" : "") + (r.patientObj?.gender ? " / " + r.patientObj.gender.charAt(0).toUpperCase() : ""),
+      "IPD NO": "SH/" + (r.patientObj?.tpa ? r.patientObj.tpa.substring(0,4).toUpperCase() : "GEN") + "/26/" + (1900 + r.admNo),
+      "CARD NO": r.patientObj?.tpaCard || r.patientObj?.tpaPanelCardNo || "—",
+      "ROOM": r.admObj?.discharge?.wardName || "—",
+      "DOA & TIME": r.doa ? fmtDT(r.doa) : "",
+      "DOD & TIME": r.dod ? fmtDT(r.dod) : "",
+      "STAY": r.doa && r.dod ? Math.ceil((new Date(r.dod) - new Date(r.doa)) / (1000*60*60*24)) + " Days" : "—",
+      "TYPE": r.admObj?.admissionType || "IPD",
+      "TYPE REFERRAL/EMERGENCY": r.admObj?.discharge?.admissionType || "—",
+      "CONSULTANT NAME": r.admObj?.discharge?.doctorName || "—",
+      "NUMBER": r.patientObj?.phone || "—",
+      "ADDRESS": r.patientObj?.address || "—",
       "DISCHARGE STATUS": r.status || "Pending",
       "BILL STATUS": (r.billing && (r.billing.paidNow || r.billing.paymentMode)) ? "Generated" : "Pending",
     }));
@@ -240,7 +248,8 @@ export default function PatientsHistoryPage({db, locId, onBack, onDischarge, onG
                 </div>
               ))}
             </div>
-            <div style={{ padding: "14px 24px", borderTop: "1px solid #BFDBEE", display: "flex", justifyContent: "flex-end" }}>
+            <div style={{ padding: "14px 24px", borderTop: "1px solid #BFDBEE", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <button onClick={() => downloadAdmissionNote(medHistModal, null, null, locId)} style={{ padding: "8px 18px", borderRadius: 8, border: "1.5px solid #4A7FA5", background: "#F0F9FF", color: "#4A7FA5", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>🖨 Download Admission Note</button>
               <button className="btn btn-ghost" onClick={() => setMedHistModal(null)}>Close</button>
             </div>
           </div>

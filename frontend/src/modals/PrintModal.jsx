@@ -72,7 +72,7 @@ export default function PrintModal({uhid,patient,discharge,svcs,billing,locId,ad
           <table style={{width:"100%",borderCollapse:"collapse",marginTop:0,border:"1px solid #000"}}>
             <tbody>
               {[
-                [["IPD No.",mockIpdNo],["Bill No.",mockBillNo]],
+                [["UHID",uhid||"—"],["Bill No.",mockBillNo]],[["IPD No.",mockIpdNo],["Bill Date",`${today} ${nowTime} HRS`]],
                 [["Patient Name",patient.patientName?.toUpperCase()||"—"],["Bill Date",`${today} ${nowTime} HRS`]],
                 [["Guardian Name",patient.guardianName?.toUpperCase()||"—"],["Age/Sex",`${patient.ageYY||"—"} YRS / ${patient.gender?.toUpperCase()||"—"}`]],
                 [["Address",(patient.address||"—").toUpperCase()],["Card No.",patient.tpaCard||patient.tpaPanelCardNo||"—"]],

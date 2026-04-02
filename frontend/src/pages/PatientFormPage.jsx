@@ -49,7 +49,7 @@ export default function PatientFormPage({data, setData, onSubmit, errs, onBack})
         <div className="g2">
           <Inp label="Phone Number" req type="tel" placeholder="10-digit mobile" value={data.phone} onChange={set("phone")} err={errs?.phone} />
           <Inp label="Alternate Number" type="tel" placeholder="10-digit alternate" value={data.altPhone} onChange={set("altPhone")} />
-          <Inp label="Email Address" req type="email" placeholder="patient@email.com" value={data.email} onChange={set("email")} err={errs?.email} />
+          <Inp label="Email Address" type="email" placeholder="patient@email.com" value={data.email} onChange={set("email")} err={errs?.email} />
           <Inp label="National ID" req placeholder="Aadhar / PAN / Passport" value={data.nationalId} onChange={set("nationalId")} err={errs?.nationalId} />
           <div className="s2"><Field label="Residential Address" req err={errs?.address}><textarea className={`ctrl${errs?.address ? " err" : ""}`} rows={2} placeholder="Full address with city, state and PIN code" value={data.address} onChange={set("address")} /></Field></div>
         </div>

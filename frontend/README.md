@@ -26,7 +26,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 Role, User ID, Password, Access
 Super Admin - superadmin , super123, (Analytics + Both Branches)
-Lakshmi Admin - admin_laxmi,laxmi123, Lakshmi Nagar Branch
+Lakshmi Admin - ,admin_laxmilaxmi123, Lakshmi Nagar Branch
 Raya Admin - admin_raya,raya123, Raya Branch
 
 > **Super Admin** has a branch switcher in the header to switch between branches.

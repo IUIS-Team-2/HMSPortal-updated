@@ -17,6 +17,7 @@ import PatientsHistoryPage from "./pages/PatientsHistoryPage";
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import MedicalHistoryPage from "./pages/MedicalHistoryPage";
 import LoginPage from "./pages/LoginPage";
+import UserManagementPage from "./pages/UserManagementPage";
 
 // Modals
 import UHIDScreen from "./modals/UHIDScreen";
@@ -24,10 +25,10 @@ import PrintModal from "./modals/PrintModal";
 import PatientDetailModal from "./modals/PatientDetailModal";
 
 export default function App() {
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [locId, setLocId] = useState("laxmi");
-  const [page, setPage] = useState("patient");
+  const [loggedIn, setLoggedIn] = useState(() => sessionStorage.getItem("loggedIn") === "true");
+  const [currentUser, setCurrentUser] = useState(() => { try { return JSON.parse(sessionStorage.getItem("currentUser")); } catch { return null; } });
+  const [locId, setLocId] = useState(() => sessionStorage.getItem("locId") || "laxmi");
+  const [page, setPage] = useState(() => { const savedPage = sessionStorage.getItem("page"); const user = (() => { try { return JSON.parse(sessionStorage.getItem("currentUser")); } catch { return null; } })(); if (savedPage) return savedPage; return user?.role === "superadmin" ? "superadmin" : "patient"; });
   const [subPage, setSubPage] = useState("search");
   const [uhid, setUhid] = useState(null);
   const [admNo, setAdmNo] = useState(1);
@@ -75,8 +76,11 @@ export default function App() {
     setCurrentUser(user);
     setLocId(loc || "laxmi");
     setLoggedIn(true);
+    sessionStorage.setItem("loggedIn", "true");
+    sessionStorage.setItem("currentUser", JSON.stringify(user));
+    sessionStorage.setItem("locId", loc || "laxmi");
     if (user.role === "superadmin") {
-      setPage("superadmin");
+      setPage("superadmin"); sessionStorage.setItem("page", "superadmin");
     } else {
       setPage("patient");
       setSubPage("search");
@@ -129,7 +133,7 @@ export default function App() {
   };
 
   const validatePatient = () => {
-    const e = {}; if (!patient.patientName.trim()) e.patientName = "Required"; if (!patient.guardianName.trim()) e.guardianName = "Required"; if (!patient.gender) e.gender = "Required"; if (!patient.phone || patient.phone.replace(/\D/g, "").length !== 10) e.phone = "Must be 10 digits"; if (!patient.email || !patient.email.includes("@")) e.email = "Valid email required"; if (!patient.nationalId.trim()) e.nationalId = "Required"; if (!patient.address.trim()) e.address = "Required"; setErrs(e); return !Object.keys(e).length;
+    const e = {}; if (!patient.patientName.trim()) e.patientName = "Required"; if (!patient.guardianName.trim()) e.guardianName = "Required"; if (!patient.gender) e.gender = "Required"; if (!patient.phone || patient.phone.replace(/\D/g, "").length !== 10) e.phone = "Must be 10 digits"; if (!patient.nationalId.trim()) e.nationalId = "Required"; if (!patient.address.trim()) e.address = "Required"; setErrs(e); return !Object.keys(e).length;
   };
 
   const handleRegister = () => {
@@ -153,7 +157,6 @@ export default function App() {
     setServicesDone(true); setPage("summary");
   };
 
-  // Invoice print request: branch staff requests → super admin approves
   const handleRequestPrint = (req) => {
     setPrintRequests(prev => [...prev, { ...req, requestedAt: new Date().toISOString() }]);
   };
@@ -178,7 +181,6 @@ export default function App() {
 
   if (!loggedIn) return <LoginPage onLogin={handleLogin} />;
 
-  // ── SUPER ADMIN: render FULLSCREEN, no header/sidebar ──
   if (page === "superadmin") {
     return (
       <>
@@ -191,13 +193,12 @@ export default function App() {
           db={db}
           printRequests={printRequests}
           onApprovePrint={handleApprovePrint}
-          onLogout={() => { setLoggedIn(false); setCurrentUser(null); resetAll(); setPrintRequests([]); }}
+          onLogout={() => { setLoggedIn(false); setCurrentUser(null); resetAll(); setPrintRequests([]); sessionStorage.clear(); }}
         />
       </>
     );
   }
 
-  // ── BRANCH STAFF: normal layout with header + sidebar ──
   return (
     <>
       {showPrint && (
@@ -227,7 +228,6 @@ export default function App() {
           <LiveDate />
           {currentUser && (
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginLeft: 12 }}>
-
               <div style={{ fontSize: 12, lineHeight: 1.4, textAlign: "right" }}>
                 <div style={{ fontWeight: 700, color: "#fff" }}>{currentUser.name}</div>
                 <div style={{ color: "rgba(255,255,255,.5)" }}>
@@ -235,7 +235,7 @@ export default function App() {
                 </div>
               </div>
               <button
-                onClick={() => { setLoggedIn(false); setCurrentUser(null); resetAll(); }}
+                onClick={() => { setLoggedIn(false); setCurrentUser(null); resetAll(); sessionStorage.clear(); }}
                 style={{ padding: "6px 14px", borderRadius: 8, background: "rgba(255,255,255,.1)", border: "1px solid rgba(255,255,255,.2)", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
                 Logout
               </button>
@@ -290,7 +290,7 @@ export default function App() {
           {page === "medical"  && <MedicalHistoryPage data={medicalHistory} setData={setMedicalHistory} onSave={handleSaveMedical} onSkip={handleSaveMedical} patient={patient} discharge={discharge} locId={locId} />}
           {page === "discharge"&& <DischargePage data={discharge} setData={setDischarge} onSave={handleSaveDischarge} />}
           {page === "services" && <ServicesPage svcs={svcs} setSvcs={setSvcs} billing={billing} setBilling={setBilling} onSave={handleSaveServices} />}
-          {page === "summary"  && <SummaryPage uhid={uhid} patient={patient} discharge={discharge} svcs={svcs} billing={billing} locId={locId} admNo={admNo} onPrint={() => setShowPrint(true)} />}
+          {page === "summary"  && <SummaryPage uhid={uhid} patient={patient} discharge={discharge} svcs={svcs} billing={billing} locId={locId} admNo={admNo} onPrint={() => setShowPrint(true)} onRequestPrint={handleRequestPrint} />}
           {page === "history"  && <PatientsHistoryPage db={currentDb} locId={locId} onBack={() => setPage("patient")} onDischarge={handleDischargeFromHistory} onGenerateBill={handleGenerateBillFromHistory} onSetExpectedDod={handleSetExpectedDod} onViewPatient={p => setShowPatientDetail(p)} onSaveMedHistory={handleSaveMedHistoryFromHistory} />}
         </main>
       </div>
