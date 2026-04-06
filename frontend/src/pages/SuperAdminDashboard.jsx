@@ -1,469 +1,552 @@
-import { downloadAdmissionNote } from "./MedicalHistoryPage";
-import UserManagementPage from './UserManagementPage';
-import { useState, useEffect, useRef } from "react";
+import React, { useState } from 'react';
+import { useAuth } from '../App';
+import {
+  PATIENTS, INVOICES, MEDICINES, HMS_USERS, BRANCHES, DEPARTMENTS,
+  BILL_ITEMS, fmt, fmtDate, getFilteredPatients, getFilteredInvoices, downloadCSV,
+} from '../data/hmsData';
+import {
+  Badge, BranchPill, StatCard, Card, CardHeader, Btn, Table,
+  Modal, Field, Input, Select, TabBar, Alert, PageHeader, NavItem, OCEAN,
+} from '../components/ui';
 
-const BRANCH_COLORS = { laxmi: "#378ADD", raya: "#D85A30" };
-const BRANCH_LABELS = { laxmi: "Lakshmi Nagar", raya: "Raya" };
+// ─── Sidebar ──────────────────────────────────────────────────────────────────
+const NAV_SECTIONS = [
+  { label:'Overview',       items:[{ id:'dashboard', icon:'📊', label:'Dashboard' },{ id:'patients', icon:'🧑‍⚕️', label:'Patients' },{ id:'reports', icon:'📋', label:'Reports & Summaries' }] },
+  { label:'Finance',        items:[{ id:'invoices', icon:'💳', label:'Invoices & Billing' },{ id:'billing', icon:'✏️', label:'Bill Management' }] },
+  { label:'Administration', items:[{ id:'users', icon:'👥', label:'User Management' },{ id:'pharmacy', icon:'💊', label:'Pharmacy' },{ id:'discharge', icon:'🚪', label:'Discharge' }] },
+];
 
-function BarChart({ data, color = "#1D9E75", unit = "" }) {
-  const max = Math.max(...data.map(d => d.value), 1);
+function Sidebar({ page, setPage, branch, setBranch, user, onLogout }) {
+  const [branchOpen, setBranchOpen] = useState(false);
+
   return (
-    <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 80 }}>
-      {data.map((d, i) => (
-        <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
-          <span style={{ fontSize: 9, color: "rgba(255,255,255,.5)" }}>{d.value}{unit}</span>
-          <div style={{ width: "100%", background: color, borderRadius: "3px 3px 0 0", height: `${(d.value / max) * 60}px`, minHeight: 4, transition: "height .4s ease" }} />
-          <span style={{ fontSize: 9, color: "rgba(255,255,255,.4)" }}>{d.label}</span>
+    <div style={{
+      width: 230, minHeight:'100vh', background: OCEAN[900],
+      display:'flex', flexDirection:'column', position:'fixed', top:0, left:0, zIndex:50,
+    }}>
+      {/* Logo */}
+      <div style={{ padding:'20px 16px 16px', borderBottom:'1px solid rgba(255,255,255,0.08)' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+          <div style={{ width:36, height:36, borderRadius:10, background:'rgba(255,255,255,0.12)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18 }}>🏥</div>
+          <div>
+            <div style={{ color:'#fff', fontWeight:700, fontSize:14 }}>Sangi Hospital</div>
+            <div style={{ color:'rgba(255,255,255,0.45)', fontSize:10, textTransform:'uppercase', letterSpacing:'0.08em' }}>Super Admin</div>
+          </div>
         </div>
-      ))}
+      </div>
+
+      {/* Branch Switcher */}
+      <div style={{ padding:'12px 8px', borderBottom:'1px solid rgba(255,255,255,0.08)' }}>
+        <div style={{ fontSize:10, color:'rgba(255,255,255,0.4)', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.08em', marginBottom:6, paddingLeft:8 }}>Branch</div>
+        <button
+          onClick={() => setBranchOpen(o => !o)}
+          style={{
+            width:'100%', padding:'8px 12px', borderRadius:8,
+            background:'rgba(255,255,255,0.1)', border:'1px solid rgba(255,255,255,0.15)',
+            color:'#fff', fontSize:13, cursor:'pointer', display:'flex', justifyContent:'space-between', alignItems:'center',
+          }}
+        >
+          <span>{BRANCHES[branch]?.label}</span>
+          <span>{branchOpen ? '▴' : '▾'}</span>
+        </button>
+        {branchOpen && (
+          <div style={{ background:'rgba(255,255,255,0.08)', borderRadius:8, marginTop:4, overflow:'hidden' }}>
+            {Object.entries(BRANCHES).map(([k, v]) => (
+              <div key={k} onClick={() => { setBranch(k); setBranchOpen(false); }} style={{
+                padding:'8px 14px', fontSize:13, cursor:'pointer', color: branch===k ? '#60a5fa' : 'rgba(255,255,255,0.7)',
+                background: branch===k ? 'rgba(96,165,250,0.15)' : 'transparent',
+                fontWeight: branch===k ? 600 : 400,
+              }}>{v.label}</div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Nav */}
+      <div style={{ flex:1, overflowY:'auto', padding:'8px 0' }}>
+        {NAV_SECTIONS.map(sec => (
+          <div key={sec.label} style={{ marginBottom:8 }}>
+            <div style={{ fontSize:10, color:'rgba(255,255,255,0.35)', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.1em', padding:'8px 24px 4px' }}>{sec.label}</div>
+            {sec.items.map(item => (
+              <NavItem key={item.id} icon={item.icon} label={item.label} active={page===item.id} onClick={() => setPage(item.id)} />
+            ))}
+          </div>
+        ))}
+      </div>
+
+      {/* User Footer */}
+      <div style={{ padding:'12px', borderTop:'1px solid rgba(255,255,255,0.08)' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', background:'rgba(255,255,255,0.07)', borderRadius:10 }}>
+          <div style={{ width:32, height:32, borderRadius:8, background:OCEAN[400], display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, color:'#fff', fontWeight:700, flexShrink:0 }}>
+            {user.name.charAt(0)}
+          </div>
+          <div style={{ flex:1, minWidth:0 }}>
+            <div style={{ fontSize:12, color:'#fff', fontWeight:600, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{user.name}</div>
+            <div style={{ fontSize:10, color:'rgba(255,255,255,0.4)' }}>Super Admin</div>
+          </div>
+          <button onClick={onLogout} title="Logout" style={{ background:'none', border:'none', color:'rgba(255,255,255,0.4)', cursor:'pointer', fontSize:16 }}>⏻</button>
+        </div>
+      </div>
     </div>
   );
 }
 
-function DonutChart({ segments, size = 80 }) {
-  const r = 28, cx = 40, cy = 40, circ = 2 * Math.PI * r;
-  const total = segments.reduce((s, x) => s + x.value, 0) || 1;
-  let offset = 0;
+// ─── Dashboard Home ───────────────────────────────────────────────────────────
+function DashboardHome({ branch }) {
+  const fp = getFilteredPatients(branch);
+  const fi = getFilteredInvoices(branch);
+  const totalBills = fp.reduce((a, p) => a + p.bills, 0);
+  const pending = fi.filter(i => i.status === 'Pending').length;
+  const cashPts = fp.filter(p => p.admType === 'Cash').length;
+  const cashlessPts = fp.filter(p => p.admType === 'Cashless').length;
+
   return (
-    <svg width={size} height={size} viewBox="0 0 80 80">
-      <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(255,255,255,.08)" strokeWidth={10} />
-      {segments.map((seg, i) => {
-        const dash = (seg.value / total) * circ;
-        const gap = circ - dash;
-        const el = (
-          <circle key={i} cx={cx} cy={cy} r={r} fill="none"
-            stroke={seg.color} strokeWidth={10}
-            strokeDasharray={`${dash} ${gap}`}
-            strokeDashoffset={-offset}
-            transform="rotate(-90 40 40)" />
-        );
-        offset += dash;
-        return el;
-      })}
-    </svg>
+    <div>
+      <PageHeader title="Dashboard" sub={`${BRANCHES[branch]?.label} · ${new Date().toLocaleDateString('en-IN',{dateStyle:'long'})}`}
+        actions={[
+          <Btn key="dl" onClick={() => downloadCSV(fp,'patients.csv')}>↓ Export Patients</Btn>,
+          <Btn key="dl2" onClick={() => downloadCSV(fi,'invoices.csv')}>↓ Export Invoices</Btn>,
+        ]}
+      />
+
+      {pending > 0 && (
+        <Alert type="warn">
+          ⚠️ <strong>{pending} invoice(s)</strong> are pending your approval. These require Super Admin sign-off before billing is finalised.
+        </Alert>
+      )}
+
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:14, marginBottom:24 }}>
+        <StatCard label="Total Patients"  value={fp.length}    sub={`${cashPts} Cash · ${cashlessPts} Cashless`} />
+        <StatCard label="Total Billing"   value={fmt(totalBills)} sub="All active patients" accent="#0f766e" />
+        <StatCard label="Pending Invoices" value={pending}     sub="Needs approval"          accent="#d97706" />
+        <StatCard label="Beds Occupied"   value={fp.length}    sub="Across all wards"        accent="#7c3aed" />
+      </div>
+
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16 }}>
+        <Card>
+          <CardHeader title="Recent Patients" action={<Btn size="sm">View All</Btn>} />
+          <Table
+            columns={[
+              { label:'Name', key:'name', render:r=><span style={{fontWeight:600}}>{r.name}</span> },
+              { label:'Ward', key:'ward' },
+              { label:'DOD', key:'dod', render:r=>r.dod ? new Date(r.dod).toLocaleDateString('en-IN') : <Badge variant="amber">Pending</Badge> },
+              { label:'Type', key:'admType', render:r=><Badge variant={r.admType==='Cash'?'teal':'blue'}>{r.admType}</Badge> },
+            ]}
+            data={fp.slice(0, 5)}
+          />
+        </Card>
+        <Card>
+          <CardHeader title="Invoice Status" action={<Btn size="sm">View All</Btn>} />
+          <Table
+            columns={[
+              { label:'Invoice', key:'id', render:r=><span style={{fontSize:12,color:'#6b7280'}}>{r.id}</span> },
+              { label:'Patient', key:'patient' },
+              { label:'Amount', key:'amount', render:r=><span style={{fontWeight:600}}>{fmt(r.amount)}</span> },
+              { label:'Status', key:'status', render:r=><Badge variant={r.status==='Approved'?'green':'amber'}>{r.status}</Badge> },
+            ]}
+            data={fi.slice(0, 5)}
+          />
+        </Card>
+      </div>
+    </div>
   );
 }
 
-function computeStats(db, locId) {
-  const locs = locId === "all" ? ["laxmi", "raya"] : [locId];
-  let patients = 0, admissions = 0, discharges = 0, revenue = 0, pendingBills = 0;
-  const serviceMap = {};
-  const recentPatients = [];
+// ─── Patients Page ────────────────────────────────────────────────────────────
+function PatientsPage({ branch }) {
+  const [tab, setTab] = useState('all');
+  const [search, setSearch] = useState('');
+  const [selected, setSelected] = useState(null);
 
-  locs.forEach(loc => {
-    (db[loc] || []).forEach(p => {
-      patients++;
-      (p.admissions || []).forEach(adm => {
-        admissions++;
-        if (adm.discharge && adm.discharge.actualDod) discharges++;
-        const total = adm.billing?.grandTotal || adm.billing?.total || 0;
-        revenue += Number(total) || 0;
-        if (!adm.billing?.paid) pendingBills++;
-        (adm.services || []).forEach(svc => {
-          const name = svc.serviceName || svc.name || "Other";
-          const amt = Number(svc.amount || svc.price || 0);
-          serviceMap[name] = (serviceMap[name] || 0) + amt;
-        });
-        recentPatients.push({
-          uhid: p.uhid, name: p.patientName || "—", branch: BRANCH_LABELS[loc],
-          branchKey: loc, admType: adm.admissionType || "IPD", total: total,
-          status: adm.discharge?.actualDod ? "Discharged" : "Admitted",
-          admNo: adm.admNo, adm, patientObj: p, expDod: adm.discharge?.expectedDod || null,
-        });
-      });
-    });
+  const fp = getFilteredPatients(branch).filter(p => {
+    if (tab === 'cash' && p.admType !== 'Cash') return false;
+    if (tab === 'cashless' && p.admType !== 'Cashless') return false;
+    if (search && !p.name.toLowerCase().includes(search.toLowerCase()) && !p.uhid.includes(search)) return false;
+    return true;
   });
 
-  const topServices = Object.entries(serviceMap).sort((a, b) => b[1] - a[1]).slice(0, 5)
-    .map(([label, value]) => ({ label: label.length > 10 ? label.slice(0, 10) + "…" : label, value }));
-  recentPatients.sort((a, b) => new Date(b.adm.dateTime) - new Date(a.adm.dateTime));
-  return { patients, admissions, discharges, revenue, pendingBills, topServices, recentPatients: recentPatients.slice(0, 8) };
-}
-
-export default function SuperAdminDashboard({ db, onBack, onLogout, printRequests = [], onApprovePrint, onViewBill }) {
-  const [viewedReqs, setViewedReqs] = useState(new Set());
-  const [viewLoc, setViewLoc] = useState("all");
-  const [dropOpen, setDropOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("dashboard"); // "dashboard" | "requests"
-  const dropRef = useRef(null);
-
-  useEffect(() => {
-    const handler = e => { if (dropRef.current && !dropRef.current.contains(e.target)) setDropOpen(false); };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  const stats = computeStats(db, viewLoc);
-
-  // Filter requests by branch if needed
-  const filteredRequests = viewLoc === "all"
-    ? printRequests
-    : printRequests.filter(r => r.locId === viewLoc || (viewLoc === "laxmi" && r.locId === "laxmi-nagar") || (viewLoc === "raya" && r.locId === "raya"));
-
-  const admissionsOverTime = (() => {
-    const months = ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar"];
-    const laxmiData = [38, 42, 35, 50, 48, 54];
-    const rayaData = [22, 26, 20, 31, 29, 35];
-    if (viewLoc === "laxmi") return months.map((label, i) => ({ label, value: laxmiData[i] }));
-    if (viewLoc === "raya") return months.map((label, i) => ({ label, value: rayaData[i] }));
-    return months.map((label, i) => ({ label, value: laxmiData[i] + rayaData[i] }));
-  })();
-
-  const bedOccupancy = viewLoc === "all"
-    ? [{ label: "Lakshmi Nagar", value: 82 }, { label: "Raya", value: 71 }]
-    : [{ label: BRANCH_LABELS[viewLoc], value: viewLoc === "laxmi" ? 82 : 71 }];
-
-  const dischargeSeg = [
-    { color: "#1D9E75", value: 72, label: "Recovered" },
-    { color: "#FAC775", value: 18, label: "Referred" },
-    { color: "#E24B4A", value: 10, label: "LAMA" },
-  ];
-
-  const revenueSplit = viewLoc === "all"
-    ? [{ color: "#378ADD", value: 62, label: "Lakshmi Nagar" }, { color: "#D85A30", value: 38, label: "Raya" }]
-    : [{ color: BRANCH_COLORS[viewLoc], value: 100, label: BRANCH_LABELS[viewLoc] }];
-
-  const locOptions = [
-    { key: "all", label: "All Branches", sub: "Combined view", color: "#1D9E75" },
-    { key: "laxmi", label: "Lakshmi Nagar", sub: "Mathura", color: "#378ADD" },
-    { key: "raya", label: "Raya", sub: "Mathura", color: "#D85A30" },
-  ];
-  const activeLoc = locOptions.find(l => l.key === viewLoc);
-
-  const S = {
-    wrap: { background: "#0f1117", minHeight: "100vh", fontFamily: "system-ui,sans-serif", color: "#fff" },
-    topbar: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 24px", borderBottom: "1px solid rgba(255,255,255,.07)", background: "#141720" },
-    brandRow: { display: "flex", alignItems: "center", gap: 10 },
-    brandIcon: { width: 34, height: 34, background: "#0F6E56", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" },
-    navRight: { display: "flex", alignItems: "center", gap: 10 },
-    pill: { fontSize: 12, padding: "5px 12px", borderRadius: 20, border: "1px solid rgba(255,255,255,.12)", color: "rgba(255,255,255,.6)", background: "transparent" },
-    locBtn: { display: "flex", alignItems: "center", gap: 7, padding: "6px 14px", borderRadius: 20, border: "1px solid rgba(255,255,255,.18)", background: "rgba(255,255,255,.06)", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#fff" },
-    locDot: (color) => ({ width: 8, height: 8, borderRadius: "50%", background: color, flexShrink: 0 }),
-    dropdown: { position: "absolute", top: "calc(100% + 8px)", right: 0, background: "#1e2130", border: "1px solid rgba(255,255,255,.1)", borderRadius: 12, minWidth: 210, zIndex: 100, overflow: "hidden" },
-    dropOption: (active) => ({ display: "flex", alignItems: "center", gap: 10, padding: "11px 16px", cursor: "pointer", borderBottom: "1px solid rgba(255,255,255,.06)", background: active ? "rgba(255,255,255,.06)" : "transparent" }),
-    backBtn: { fontSize: 12, padding: "6px 14px", borderRadius: 8, background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.12)", color: "#fff", cursor: "pointer" },
-    body: { padding: "24px" },
-    pageTitle: { fontSize: 22, fontWeight: 700, marginBottom: 2 },
-    pageSub: { fontSize: 13, color: "rgba(255,255,255,.45)", marginBottom: 16 },
-    branchTag: { display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, padding: "4px 12px", background: "rgba(29,158,117,.15)", borderRadius: 20, color: "#1D9E75", fontWeight: 600, marginBottom: 24 },
-    metricsGrid: { display: "grid", gridTemplateColumns: "repeat(6,minmax(0,1fr))", gap: 12, marginBottom: 24 },
-    metricCard: { background: "#1a1f2e", borderRadius: 10, padding: "14px 16px" },
-    metricLabel: { fontSize: 11, color: "rgba(255,255,255,.4)", marginBottom: 4 },
-    metricValue: { fontSize: 22, fontWeight: 700 },
-    metricDelta: { fontSize: 11, marginTop: 3, color: "#1D9E75" },
-    chartsRow: { display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16, marginBottom: 16 },
-    chartsRow2: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 16 },
-    card: { background: "#1a1f2e", borderRadius: 12, padding: 18, border: "1px solid rgba(255,255,255,.06)" },
-    cardTitle: { fontSize: 14, fontWeight: 600, marginBottom: 2 },
-    cardSub: { fontSize: 12, color: "rgba(255,255,255,.4)", marginBottom: 14 },
-    legend: { display: "flex", gap: 12, marginBottom: 10, flexWrap: "wrap" },
-    legendItem: { display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: "rgba(255,255,255,.5)" },
-    legendDot: (color) => ({ width: 9, height: 9, borderRadius: 2, background: color, flexShrink: 0 }),
-    table: { width: "100%", borderCollapse: "collapse", fontSize: 13 },
-    th: { fontSize: 11, color: "rgba(255,255,255,.35)", fontWeight: 400, textAlign: "left", padding: "6px 0", borderBottom: "1px solid rgba(255,255,255,.07)" },
-    td: { padding: "11px 0", borderBottom: "1px solid rgba(255,255,255,.05)", color: "#fff" },
-    dlBtn: { display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, padding: "4px 10px", borderRadius: 6, border: "1px solid rgba(255,255,255,.15)", background: "rgba(255,255,255,.05)", color: "#fff", cursor: "pointer" },
-  };
-
-  const statusStyle = s => s === "Discharged"
-    ? { background: "rgba(29,158,117,.15)", color: "#1D9E75", padding: "2px 9px", borderRadius: 20, fontSize: 11 }
-    : s === "Admitted"
-    ? { background: "rgba(55,138,221,.15)", color: "#378ADD", padding: "2px 9px", borderRadius: 20, fontSize: 11 }
-    : { background: "rgba(250,199,117,.15)", color: "#FAC775", padding: "2px 9px", borderRadius: 20, fontSize: 11 };
-
   return (
-    <div style={S.wrap}>
-      {/* topbar */}
-      <div style={S.topbar}>
-        <div style={S.brandRow}>
-          <div style={S.brandIcon}>
-            <svg width={18} height={18} viewBox="0 0 24 24" fill="white"><path d="M12 2L3 7v10l9 5 9-5V7z"/></svg>
-          </div>
-          <div>
-            <div style={{ fontSize: 14, fontWeight: 700 }}>Sangi Hospital</div>
-            <div style={{ fontSize: 10, color: "rgba(255,255,255,.4)", letterSpacing: 1 }}>IPD PORTAL</div>
-          </div>
-        </div>
-
-        <div style={S.navRight}>
-          <div style={S.pill}>{new Date().toLocaleDateString("en-IN", { weekday: "short", day: "2-digit", month: "short", year: "numeric" })}</div>
-
-          {/* Tabs */}
-          <div style={{ display: "flex", gap: 4, background: "rgba(255,255,255,.06)", borderRadius: 10, padding: 4 }}>
-            <button onClick={() => setActiveTab("dashboard")}
-              style={{ padding: "6px 14px", borderRadius: 7, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600,
-                background: activeTab === "dashboard" ? "rgba(255,255,255,.12)" : "transparent",
-                color: activeTab === "dashboard" ? "#fff" : "rgba(255,255,255,.4)" }}>
-              📊 Dashboard
-            </button>
-            <button onClick={() => setActiveTab("requests")}
-              style={{ padding: "6px 14px", borderRadius: 7, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, position: "relative",
-                background: activeTab === "requests" ? "rgba(255,255,255,.12)" : "transparent",
-                color: activeTab === "requests" ? "#fff" : "rgba(255,255,255,.4)" }}>
-              🖨 Print Requests
-              {printRequests.length > 0 && (
-                <span style={{ position: "absolute", top: 2, right: 4, background: "#E24B4A", color: "#fff", borderRadius: "50%", width: 16, height: 16, fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  {printRequests.length}
-                </span>
-              )}
-            </button>
-            <button onClick={() => setActiveTab("users")}
-              style={{ padding: "6px 14px", borderRadius: 7, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600,
-                background: activeTab === "users" ? "rgba(255,255,255,.12)" : "transparent",
-                color: activeTab === "users" ? "#fff" : "rgba(255,255,255,.4)" }}>
-              👥 Users
-            </button>
-          </div>
-          {/* location switcher */}
-          <div ref={dropRef} style={{ position: "relative" }}>
-            <button style={S.locBtn} onClick={() => setDropOpen(o => !o)}>
-              <span style={S.locDot(activeLoc.color)} />
-              {activeLoc.label}
-              <span style={{ fontSize: 10, color: "rgba(255,255,255,.4)" }}>▾</span>
-            </button>
-            {dropOpen && (
-              <div style={S.dropdown}>
-                {locOptions.map(opt => (
-                  <div key={opt.key} style={S.dropOption(viewLoc === opt.key)}
-                    onClick={() => { setViewLoc(opt.key); setDropOpen(false); }}>
-                    <span style={S.locDot(opt.color)} />
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 600 }}>{opt.label}</div>
-                      <div style={{ fontSize: 11, color: "rgba(255,255,255,.4)" }}>{opt.sub}</div>
-                    </div>
-                    {viewLoc === opt.key && <span style={{ marginLeft: "auto", fontSize: 14, color: "#1D9E75" }}>✓</span>}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div style={{ fontSize: 12, textAlign: "right", lineHeight: 1.4 }}>
-            <div style={{ fontWeight: 700 }}>Super Admin</div>
-            <div style={{ color: "rgba(255,255,255,.4)" }}>All Branches</div>
-          </div>
-          <button style={S.backBtn} onClick={onLogout}>⏻ Logout</button>
-        </div>
+    <div>
+      <PageHeader title="Patients" sub={`${fp.length} records · ${BRANCHES[branch]?.label}`}
+        actions={[<Btn key="dl" onClick={() => downloadCSV(fp,'patients.csv')}>↓ Download CSV</Btn>]}
+      />
+      <TabBar
+        tabs={[{id:'all',label:'All'},{id:'cash',label:'Cash'},{id:'cashless',label:'Cashless'}]}
+        active={tab} onChange={setTab}
+      />
+      <div style={{ marginBottom:14 }}>
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search name or UHID…"
+          style={{ padding:'8px 14px', border:'1px solid #d1d5db', borderRadius:8, fontSize:13, width:280, outline:'none' }} />
       </div>
+      <Card padding="0">
+        <Table
+          data={fp}
+          columns={[
+            { label:'#', render:(_,i)=>i+1 },
+            { label:'Patient', render:r=><div><div style={{fontWeight:600}}>{r.name}</div><div style={{fontSize:11,color:'#9ca3af'}}>{r.uhid}</div></div> },
+            { label:'Age/Ward', render:r=>`${r.age}y · ${r.ward}` },
+            { label:'Branch', render:r=><BranchPill branch={r.branch}/> },
+            { label:'Type', render:r=><Badge variant={r.admType==='Cash'?'teal':'blue'}>{r.admType}</Badge> },
+            { label:'Bills', render:r=><span style={{fontWeight:600}}>{fmt(r.bills)}</span>, align:'right' },
+            { label:'DOD', render:r=>r.dod ? new Date(r.dod).toLocaleDateString('en-IN') : <Badge variant="amber">Not Set</Badge> },
+            { label:'Status', render:r=><Badge variant={r.status==='Critical'?'red':r.status==='Recovered'?'green':r.status==='Stable'?'teal':'blue'}>{r.status}</Badge> },
+            { label:'', render:r=><Btn size="sm" onClick={()=>setSelected(r)}>View</Btn> },
+          ]}
+        />
+      </Card>
 
-      {/* body */}
-      <div style={S.body}>
-
-        {/* ── PRINT REQUESTS TAB ── */}
-        {activeTab === "users" && <UserManagementPage />}
-        {activeTab === "requests" && (
+      <Modal open={!!selected} onClose={()=>setSelected(null)} title={`Patient — ${selected?.name}`}>
+        {selected && (
           <div>
-            <div style={S.pageTitle}>🖨 Print Requests</div>
-            <div style={S.pageSub}>Approve or reject invoice print requests from branch staff</div>
-
-            {/* Branch filter summary */}
-            <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
-              {["laxmi", "raya"].map(loc => {
-                const count = printRequests.filter(r => r.locId === loc).length;
-                return (
-                  <div key={loc} style={{ background: "#1a1f2e", borderRadius: 10, padding: "12px 20px", border: `1px solid ${count > 0 ? BRANCH_COLORS[loc] : "rgba(255,255,255,.06)"}`, minWidth: 160 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                      <span style={{ width: 8, height: 8, borderRadius: "50%", background: BRANCH_COLORS[loc] }} />
-                      <span style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,.6)" }}>{BRANCH_LABELS[loc]}</span>
-                    </div>
-                    <div style={{ fontSize: 24, fontWeight: 700, color: count > 0 ? "#FAC775" : "rgba(255,255,255,.3)" }}>{count}</div>
-                    <div style={{ fontSize: 11, color: "rgba(255,255,255,.3)" }}>pending request{count !== 1 ? "s" : ""}</div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {filteredRequests.length === 0 ? (
-              <div style={{ ...S.card, textAlign: "center", padding: "48px 0", color: "rgba(255,255,255,.3)", fontSize: 14 }}>
-                ✅ No pending print requests
-                {viewLoc !== "all" && <div style={{ fontSize: 12, marginTop: 6 }}>for {BRANCH_LABELS[viewLoc]} branch</div>}
-              </div>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {filteredRequests.map((req, i) => (
-                  <div key={i} style={{ ...S.card, border: `1px solid ${BRANCH_COLORS[req.locId] || "#378ADD"}44` }}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                        <div style={{ width: 44, height: 44, borderRadius: 10, background: "rgba(55,138,221,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>🖨</div>
-                        <div>
-                          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 2 }}>{req.patient?.patientName || "—"}</div>
-                          <div style={{ fontSize: 12, color: "rgba(255,255,255,.45)", display: "flex", gap: 12 }}>
-                            <span>UHID: <strong style={{ color: "#fff" }}>{req.uhid}</strong></span>
-                            <span>Adm #{req.admNo}</span>
-                            <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-                              <span style={{ width: 6, height: 6, borderRadius: "50%", background: BRANCH_COLORS[req.locId] }} />
-                              {BRANCH_LABELS[req.locId] || req.locId}
-                            </span>
-                          </div>
-                          <div style={{ fontSize: 11, color: "rgba(255,255,255,.3)", marginTop: 3 }}>
-                            Requested at: {new Date(req.requestedAt).toLocaleString("en-IN")}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Bill summary */}
-                      <div style={{ fontSize: 13, color: "rgba(255,255,255,.5)", textAlign: "right" }}>
-                        <div style={{ fontSize: 18, fontWeight: 700, color: "#1D9E75" }}>
-                          ₹{(req.svcs || []).reduce((a, s) => a + (parseFloat(s.rate) || 0) * (parseInt(s.qty) || 0), 0).toFixed(2)}
-                        </div>
-                        <div style={{ fontSize: 11 }}>{(req.svcs || []).filter(s => s.title || s.type).length} service(s)</div>
-                      </div>
-
-                      {/* Action buttons */}
-                      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                        <button onClick={() => { onViewBill && onViewBill(req); setViewedReqs(prev => new Set([...prev, req.uhid + req.admNo])); }}
-                          style={{ padding: "8px 18px", borderRadius: 8, border: "1px solid #4A90D944", background: "rgba(74,144,217,.12)", color: "#4A90D9", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
-                          👁 View Bill
-                        </button>
-                        {viewedReqs.has(req.uhid + req.admNo) ? (
-                          <>
-                            <button onClick={() => onApprovePrint && onApprovePrint(req, "reject")}
-                              style={{ padding: "8px 18px", borderRadius: 8, border: "1px solid #E24B4A44", background: "rgba(226,75,74,.12)", color: "#E24B4A", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
-                              ✕ Reject
-                            </button>
-                            <button onClick={() => onApprovePrint && onApprovePrint(req, "approve")}
-                              style={{ padding: "8px 18px", borderRadius: 8, border: "none", background: "#1D9E75", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
-                              ✓ Approve & Print
-                            </button>
-                          </>
-                        ) : (
-                          <span style={{ fontSize: 11, color: "rgba(255,255,255,.3)", fontStyle: "italic" }}>View bill first to approve</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ── DASHBOARD TAB ── */}
-        {activeTab === "dashboard" && (
-          <>
-            <div style={S.pageTitle}>Super Admin Dashboard</div>
-            <div style={S.pageSub}>Analytics across all branches — real-time view</div>
-            <div style={S.branchTag}>
-              <span style={S.locDot(activeLoc.color)} />
-              {viewLoc === "all" ? "All Branches — Lakshmi Nagar + Raya" : `${activeLoc.label} Branch · Mathura`}
-            </div>
-
-            <div style={S.metricsGrid}>
-              {[
-                { label: "Total Patients", value: stats.patients, delta: "+12 this week", up: true },
-                { label: "Admissions", value: stats.admissions, delta: `${stats.admissions} total`, up: true },
-                { label: "Discharges", value: stats.discharges, delta: `${stats.admissions - stats.discharges} still admitted`, up: false },
-                { label: "Bed Occupancy", value: viewLoc === "raya" ? "71%" : viewLoc === "laxmi" ? "82%" : "78%", delta: "+4% vs last month", up: true },
-                { label: "Revenue (INR)", value: stats.revenue > 0 ? "₹" + (stats.revenue / 100000).toFixed(1) + "L" : "₹0", delta: "+18% this month", up: true },
-                { label: "Pending Bills", value: stats.pendingBills, delta: "needs attention", up: false },
-              ].map((m, i) => (
-                <div key={i} style={S.metricCard}>
-                  <div style={S.metricLabel}>{m.label}</div>
-                  <div style={S.metricValue}>{m.value}</div>
-                  <div style={{ ...S.metricDelta, color: m.up ? "#1D9E75" : "#E24B4A" }}>{m.delta}</div>
-                </div>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:16 }}>
+              {[['UHID',selected.uhid],['Age',`${selected.age} yrs`],['Ward / Bed',`${selected.ward} / ${selected.bed}`],['Branch',BRANCHES[selected.branch]?.label],['Billing Type',selected.admType],['Status',selected.status],['Date of Admission',fmtDate(selected.doa)],['Expected Discharge',selected.dod?fmtDate(selected.dod):'Not set'],['Total Bills',fmt(selected.bills)],['Bill Status',selected.billStatus]].map(([k,v])=>(
+                <div key={k}><div style={{fontSize:11,color:'#9ca3af',fontWeight:600,marginBottom:2}}>{k}</div><div style={{fontSize:14,color:'#111827',fontWeight:500}}>{v}</div></div>
               ))}
             </div>
-
-            <div style={S.chartsRow}>
-              <div style={S.card}>
-                <div style={S.cardTitle}>Admissions over time</div>
-                <div style={S.cardSub}>Monthly trend</div>
-                {viewLoc === "all" && (
-                  <div style={S.legend}>
-                    <span style={S.legendItem}><span style={S.legendDot("#378ADD")} />Lakshmi Nagar</span>
-                    <span style={S.legendItem}><span style={S.legendDot("#D85A30")} />Raya</span>
-                  </div>
-                )}
-                <BarChart data={admissionsOverTime} color={viewLoc === "raya" ? "#D85A30" : "#378ADD"} />
-              </div>
-              <div style={S.card}>
-                <div style={S.cardTitle}>Revenue split</div>
-                <div style={S.cardSub}>By branch (this month)</div>
-                <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                  <DonutChart segments={revenueSplit} />
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    {revenueSplit.map((s, i) => (
-                      <div key={i} style={S.legendItem}>
-                        <span style={S.legendDot(s.color)} />{s.label} {s.value}%
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+            <div style={{ display:'flex', gap:8, justifyContent:'flex-end', paddingTop:16, borderTop:'1px solid #f3f4f6' }}>
+              <Btn onClick={()=>downloadCSV([selected],`patient_${selected.id}.csv`)}>↓ Download</Btn>
+              <Btn variant="primary" onClick={()=>setSelected(null)}>Close</Btn>
             </div>
-
-            <div style={S.chartsRow2}>
-              <div style={S.card}>
-                <div style={S.cardTitle}>Bed occupancy</div>
-                <div style={S.cardSub}>Current % by branch</div>
-                <BarChart data={bedOccupancy} color="#378ADD" unit="%" />
-              </div>
-              <div style={S.card}>
-                <div style={S.cardTitle}>Top services</div>
-                <div style={S.cardSub}>By charges (INR)</div>
-                {stats.topServices.length > 0
-                  ? <BarChart data={stats.topServices} color="#1D9E75" />
-                  : <div style={{ fontSize: 12, color: "rgba(255,255,255,.3)", marginTop: 20 }}>No service data yet</div>}
-              </div>
-              <div style={S.card}>
-                <div style={S.cardTitle}>Discharge outcomes</div>
-                <div style={S.cardSub}>Breakdown</div>
-                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                  <DonutChart segments={dischargeSeg} size={70} />
-                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                    {dischargeSeg.map((s, i) => (
-                      <div key={i} style={S.legendItem}>
-                        <span style={S.legendDot(s.color)} />{s.label} {s.value}%
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div style={S.card}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-                <div>
-                  <div style={S.cardTitle}>Recent patients</div>
-                  <div style={S.cardSub}>Latest admissions across branches</div>
-                </div>
-                <div style={{ fontSize: 12, color: "rgba(255,255,255,.35)" }}>{stats.recentPatients.length} records</div>
-              </div>
-              {stats.recentPatients.length === 0 ? (
-                <div style={{ fontSize: 13, color: "rgba(255,255,255,.3)", padding: "24px 0", textAlign: "center" }}>No patients found.</div>
-              ) : (
-                <table style={S.table}>
-                  <thead>
-                    <tr>{["UHID", "Patient name", "Branch", "Adm type", "Exp. Discharge", "Total charges", "Status", "Adm. Note"].map(h => (
-                      <th key={h} style={S.th}>{h}</th>
-                    ))}</tr>
-                  </thead>
-                  <tbody>
-                    {stats.recentPatients.map((row, i) => (
-                      <tr key={i}>
-                        <td style={{ ...S.td, color: "rgba(255,255,255,.5)", fontSize: 12 }}>{row.uhid}</td>
-                        <td style={S.td}>{row.name}</td>
-                        <td style={S.td}>
-                          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12 }}>
-                            <span style={{ width: 6, height: 6, borderRadius: "50%", background: BRANCH_COLORS[row.branchKey] || "#888" }} />
-                            {row.branch}
-                          </span>
-                        </td>
-                        <td style={{ ...S.td, fontSize: 12 }}>{row.admType}</td>
-                        <td style={{ ...S.td, fontSize: 12, color: row.expDod ? "#FAC775" : "rgba(255,255,255,.3)" }}>{row.expDod ? new Date(row.expDod).toLocaleDateString("en-IN") : "—"}</td>
-                        <td style={S.td}>{row.total ? `₹${Number(row.total).toLocaleString("en-IN")}` : <span style={{ color: "rgba(255,255,255,.3)" }}>—</span>}</td>
-                        <td style={S.td}><span style={statusStyle(row.status)}>{row.status}</span></td>
-                        <td style={S.td}><button style={S.dlBtn} onClick={() => downloadAdmissionNote(row.adm?.medicalHistory, row.patientObj, row.adm?.discharge, row.branchKey)}>🖨 Download</button></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </>
+          </div>
         )}
+      </Modal>
+    </div>
+  );
+}
+
+// ─── Invoices Page (Super Admin can approve) ──────────────────────────────────
+function InvoicesPage({ branch }) {
+  const [invoices, setInvoices] = useState(INVOICES);
+  const [tab, setTab] = useState('all');
+
+  const fi = (branch === 'all' ? invoices : invoices.filter(i => i.branch === branch)).filter(i => {
+    if (tab === 'cash' && i.type !== 'Cash') return false;
+    if (tab === 'cashless' && i.type !== 'Cashless') return false;
+    if (tab === 'pending' && i.status !== 'Pending') return false;
+    return true;
+  });
+
+  const approve = (id) => setInvoices(prev => prev.map(i => i.id === id ? {...i, status:'Approved', approvedBy:'Super Admin'} : i));
+  const approveAll = () => setInvoices(prev => prev.map(i => i.status==='Pending' ? {...i, status:'Approved', approvedBy:'Super Admin'} : i));
+
+  const pendingCount = invoices.filter(i => i.status === 'Pending' && (branch === 'all' || i.branch === branch)).length;
+
+  return (
+    <div>
+      <PageHeader title="Invoices & Billing" sub={`${fi.length} invoices · ${BRANCHES[branch]?.label}`}
+        actions={[
+          <Btn key="dl" onClick={() => downloadCSV(fi,'invoices.csv')}>↓ Download</Btn>,
+          pendingCount > 0 && <Btn key="aa" variant="primary" onClick={approveAll}>✓ Approve All Pending ({pendingCount})</Btn>,
+        ].filter(Boolean)}
+      />
+      <TabBar
+        tabs={[{id:'all',label:'All'},{id:'cash',label:'Cash'},{id:'cashless',label:'Cashless'},{id:'pending',label:'Pending',count:pendingCount}]}
+        active={tab} onChange={setTab}
+      />
+      <Card padding="0">
+        <Table
+          data={fi}
+          columns={[
+            { label:'Invoice ID', render:r=><span style={{fontSize:12,color:'#6b7280',fontFamily:'monospace'}}>{r.id}</span> },
+            { label:'Patient', key:'patient', render:r=><span style={{fontWeight:600}}>{r.patient}</span> },
+            { label:'Date', key:'date' },
+            { label:'Amount', render:r=><span style={{fontWeight:700}}>{fmt(r.amount)}</span>, align:'right' },
+            { label:'Type', render:r=><Badge variant={r.type==='Cash'?'teal':'blue'}>{r.type}</Badge> },
+            { label:'Branch', render:r=><BranchPill branch={r.branch}/> },
+            { label:'Status', render:r=><Badge variant={r.status==='Approved'?'green':'amber'}>{r.status}</Badge> },
+            { label:'Actions', render:r=>(
+              <div style={{display:'flex',gap:6}}>
+                <Btn size="sm" onClick={() => window.print()}>Print</Btn>
+                {r.status === 'Pending' && <Btn size="sm" variant="primary" onClick={() => approve(r.id)}>✓ Approve</Btn>}
+              </div>
+            )},
+          ]}
+        />
+      </Card>
+    </div>
+  );
+}
+
+// ─── Bill Management ──────────────────────────────────────────────────────────
+function BillingPage({ branch }) {
+  const fp = getFilteredPatients(branch).filter(p => p.billStatus === 'Pending');
+  const [selPat, setSelPat] = useState(fp[0] || null);
+  const [items, setItems] = useState(BILL_ITEMS[selPat?.id] || []);
+
+  const selectPat = (p) => { setSelPat(p); setItems(BILL_ITEMS[p.id] || []); };
+  const updateItem = (id, field, val) => setItems(prev => prev.map(it => it.id===id ? {...it, [field]:Number(val), amount: field==='rate' ? Number(val)*it.qty : it.rate*Number(val)} : it));
+  const total = items.reduce((a,i) => a + i.amount, 0);
+
+  return (
+    <div>
+      <PageHeader title="Bill Management" sub="Edit rates & quantities for pending bills" />
+      <div style={{ display:'grid', gridTemplateColumns:'280px 1fr', gap:16 }}>
+        {/* Patient List */}
+        <Card padding="0">
+          <div style={{ padding:'14px 16px', borderBottom:'1px solid #f3f4f6', fontSize:13, fontWeight:600, color:'#111827' }}>Pending Bills</div>
+          {fp.length === 0 && <div style={{padding:20,fontSize:13,color:'#9ca3af',textAlign:'center'}}>No pending bills</div>}
+          {fp.map(p => (
+            <div key={p.id} onClick={() => selectPat(p)} style={{
+              padding:'12px 16px', cursor:'pointer', borderBottom:'1px solid #f9fafb',
+              background: selPat?.id===p.id ? OCEAN[50] : 'transparent',
+              borderLeft: selPat?.id===p.id ? `3px solid ${OCEAN[400]}` : '3px solid transparent',
+            }}>
+              <div style={{fontSize:13,fontWeight:600,color:'#111827'}}>{p.name}</div>
+              <div style={{fontSize:11,color:'#9ca3af'}}>{p.uhid} · {fmt(p.bills)}</div>
+            </div>
+          ))}
+        </Card>
+
+        {/* Bill Editor */}
+        <div>
+          {selPat ? (
+            <Card>
+              <CardHeader
+                title={`Editing Bill — ${selPat.name}`}
+                action={<div style={{display:'flex',gap:8}}>
+                  <Btn onClick={() => downloadCSV(items, `bill_${selPat.id}.csv`)}>↓ Download</Btn>
+                  <Btn variant="primary" onClick={() => alert('Bill saved!')}>Save All</Btn>
+                </div>}
+              />
+              <table style={{width:'100%',borderCollapse:'collapse',fontSize:13}}>
+                <thead>
+                  <tr style={{background:OCEAN[900]}}>
+                    {['Item','Rate (₹)','Qty','Amount (₹)',''].map((h,i) => (
+                      <th key={i} style={{padding:'10px 14px',color:'#93c5fd',fontWeight:600,fontSize:11,textAlign:i>0?'right':'left',textTransform:'uppercase',letterSpacing:'0.06em'}}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((item,ri) => (
+                    <tr key={item.id} style={{borderBottom:'1px solid #f3f4f6',background:ri%2===0?'#fff':'#f9fafb'}}>
+                      <td style={{padding:'10px 14px',fontWeight:500}}>{item.item}</td>
+                      <td style={{padding:'10px 14px',textAlign:'right'}}>
+                        <input type="number" value={item.rate} onChange={e=>updateItem(item.id,'rate',e.target.value)}
+                          style={{width:90,padding:'5px 8px',border:'1px solid #d1d5db',borderRadius:6,fontSize:13,textAlign:'right'}} />
+                      </td>
+                      <td style={{padding:'10px 14px',textAlign:'right'}}>
+                        <input type="number" value={item.qty} onChange={e=>updateItem(item.id,'qty',e.target.value)}
+                          style={{width:70,padding:'5px 8px',border:'1px solid #d1d5db',borderRadius:6,fontSize:13,textAlign:'right'}} />
+                      </td>
+                      <td style={{padding:'10px 14px',textAlign:'right',fontWeight:600}}>{fmt(item.amount)}</td>
+                      <td style={{padding:'10px 14px',textAlign:'right'}}><Btn size="sm">Save</Btn></td>
+                    </tr>
+                  ))}
+                  <tr style={{background:OCEAN[50]}}>
+                    <td colSpan={3} style={{padding:'12px 14px',fontWeight:700,textAlign:'right',color:OCEAN[700]}}>Total</td>
+                    <td style={{padding:'12px 14px',textAlign:'right',fontWeight:800,fontSize:16,color:OCEAN[600]}}>{fmt(total)}</td>
+                    <td />
+                  </tr>
+                </tbody>
+              </table>
+            </Card>
+          ) : <Card><div style={{textAlign:'center',padding:40,color:'#9ca3af'}}>Select a patient to edit their bill</div></Card>}
+        </div>
       </div>
+    </div>
+  );
+}
+
+// ─── Reports Page ─────────────────────────────────────────────────────────────
+function ReportsPage({ branch }) {
+  const fp = getFilteredPatients(branch);
+  return (
+    <div>
+      <PageHeader title="Reports & Summaries" sub={`${BRANCHES[branch]?.label}`}
+        actions={[<Btn key="dl" variant="primary" onClick={() => downloadCSV(fp,'all_reports.csv')}>↓ Download All</Btn>]}
+      />
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:14, marginBottom:20 }}>
+        {[
+          { title:'Patient Reports', desc:'Lab results, diagnostics, clinical notes', icon:'🔬' },
+          { title:'Discharge Summaries', desc:'Discharge notes, prescriptions, follow-ups', icon:'📄' },
+          { title:'Financial Reports', desc:'Revenue, collections, insurance claims', icon:'📊' },
+        ].map(r => (
+          <Card key={r.title}>
+            <div style={{fontSize:24,marginBottom:10}}>{r.icon}</div>
+            <div style={{fontSize:14,fontWeight:600,color:'#111827',marginBottom:6}}>{r.title}</div>
+            <div style={{fontSize:12,color:'#6b7280',marginBottom:14}}>{r.desc}</div>
+            <Btn size="sm" onClick={() => downloadCSV(fp,`${r.title.replace(/\s/g,'_')}.csv`)}>↓ Download</Btn>
+          </Card>
+        ))}
+      </div>
+      <Card padding="0">
+        <div style={{padding:'14px 20px',borderBottom:'1px solid #f3f4f6'}}><CardHeader title="Patient Summaries" /></div>
+        <Table
+          data={fp}
+          columns={[
+            { label:'ID', render:r=><span style={{fontSize:11,color:'#9ca3af',fontFamily:'monospace'}}>{r.id}</span> },
+            { label:'Patient', render:r=><div><div style={{fontWeight:600}}>{r.name}</div><div style={{fontSize:11,color:'#9ca3af'}}>{r.uhid}</div></div> },
+            { label:'Ward', key:'ward' },
+            { label:'Branch', render:r=><BranchPill branch={r.branch}/> },
+            { label:'DOA', render:r=>new Date(r.doa).toLocaleDateString('en-IN') },
+            { label:'DOD', render:r=>r.dod?new Date(r.dod).toLocaleDateString('en-IN'):<Badge variant="amber">Pending</Badge> },
+            { label:'Status', render:r=><Badge variant={r.status==='Recovered'?'green':r.status==='Critical'?'red':'teal'}>{r.status}</Badge> },
+            { label:'', render:r=><Btn size="sm" onClick={()=>downloadCSV([r],`${r.id}_summary.csv`)}>↓ PDF</Btn> },
+          ]}
+        />
+      </Card>
+    </div>
+  );
+}
+
+// ─── User Management ──────────────────────────────────────────────────────────
+function UsersPage() {
+  const [users, setUsers] = useState(HMS_USERS);
+  const [modal, setModal] = useState(false);
+  const [form, setForm] = useState({ name:'', username:'', password:'', role:'admin', dept:'Admin', branch:'laxmi' });
+
+  const createUser = () => {
+    if (!form.name || !form.username || !form.password) return alert('Please fill all fields.');
+    setUsers(prev => [...prev, { id:`U-00${prev.length+1}`, ...form, status:'Active', createdBy:'superadmin' }]);
+    setModal(false);
+    setForm({ name:'', username:'', password:'', role:'admin', dept:'Admin', branch:'laxmi' });
+  };
+
+  return (
+    <div>
+      <PageHeader title="User Management" sub={`${users.length} users registered`}
+        actions={[
+          <Btn key="ca" variant="primary" onClick={()=>{setForm(f=>({...f,role:'admin',dept:'Admin'}));setModal(true);}}>+ Create Admin</Btn>,
+          <Btn key="ce" onClick={()=>{setForm(f=>({...f,role:'employee',dept:'Billing'}));setModal(true);}}>+ Create Employee</Btn>,
+        ]}
+      />
+      <Card padding="0">
+        <Table
+          data={users}
+          columns={[
+            { label:'Name', render:r=><span style={{fontWeight:600}}>{r.name}</span> },
+            { label:'Role', render:r=><Badge variant={r.role==='admin'?'blue':'gray'}>{r.role==='admin'?'Admin':'Employee'}</Badge> },
+            { label:'Department', key:'dept' },
+            { label:'Branch', render:r=><BranchPill branch={r.branch}/> },
+            { label:'Username', render:r=><span style={{fontSize:12,fontFamily:'monospace',color:'#6b7280'}}>{r.username}</span> },
+            { label:'Status', render:r=><Badge variant={r.status==='Active'?'green':'red'}>{r.status}</Badge> },
+            { label:'', render:r=><Btn size="sm">Edit</Btn> },
+          ]}
+        />
+      </Card>
+
+      <Modal open={modal} onClose={()=>setModal(false)} title={`Create ${form.role==='admin'?'Admin':'Employee'}`}>
+        <Field label="Full Name"><Input value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder="Full name" /></Field>
+        <Field label="Username"><Input value={form.username} onChange={e=>setForm(f=>({...f,username:e.target.value}))} placeholder="username.here" /></Field>
+        <Field label="Password"><Input type="password" value={form.password} onChange={e=>setForm(f=>({...f,password:e.target.value}))} placeholder="Set password" /></Field>
+        <Field label="Department">
+          <Select value={form.dept} onChange={e=>setForm(f=>({...f,dept:e.target.value}))} options={form.role==='admin'?['Admin',...DEPARTMENTS]:DEPARTMENTS} />
+        </Field>
+        <Field label="Branch">
+          <Select value={form.branch} onChange={e=>setForm(f=>({...f,branch:e.target.value}))}
+            options={[{value:'laxmi',label:'Laxmi Nagar'},{value:'raya',label:'Raya'}]} />
+        </Field>
+        <div style={{display:'flex',gap:8,justifyContent:'flex-end',marginTop:8}}>
+          <Btn onClick={()=>setModal(false)}>Cancel</Btn>
+          <Btn variant="primary" onClick={createUser}>Create User</Btn>
+        </div>
+      </Modal>
+    </div>
+  );
+}
+
+// ─── Pharmacy Page ────────────────────────────────────────────────────────────
+function PharmacyPage({ branch }) {
+  const meds = branch==='all' ? MEDICINES : MEDICINES.filter(m=>m.branch===branch);
+  const lowStock = meds.filter(m=>m.stock<=m.reorderAt);
+
+  return (
+    <div>
+      <PageHeader title="Pharmacy" sub={`${meds.length} medicines · ${BRANCHES[branch]?.label}`}
+        actions={[<Btn key="dl" onClick={()=>downloadCSV(meds,'pharmacy.csv')}>↓ Download</Btn>]}
+      />
+      {lowStock.length>0 && <Alert type="danger">⚠️ {lowStock.length} medicine(s) at or below reorder level: {lowStock.map(m=>m.name).join(', ')}</Alert>}
+      <Card padding="0">
+        <Table
+          data={meds}
+          columns={[
+            { label:'Code', render:r=><span style={{fontSize:11,color:'#9ca3af',fontFamily:'monospace'}}>{r.id}</span> },
+            { label:'Medicine', render:r=><span style={{fontWeight:600}}>{r.name}</span> },
+            { label:'Category', render:r=><Badge variant="gray">{r.category}</Badge> },
+            { label:'Stock', render:r=><span style={{color:r.stock<=r.reorderAt?'#b91c1c':'#111827',fontWeight:600}}>{r.stock} {r.stock<=r.reorderAt?'⚠':''}</span> },
+            { label:'Unit', key:'unit' },
+            { label:'Price', render:r=>fmt(r.price), align:'right' },
+            { label:'Branch', render:r=><BranchPill branch={r.branch}/> },
+            { label:'', render:()=><div style={{display:'flex',gap:4}}><Btn size="sm">Edit Qty</Btn><Btn size="sm">Edit Price</Btn></div> },
+          ]}
+        />
+      </Card>
+    </div>
+  );
+}
+
+// ─── Discharge Page ───────────────────────────────────────────────────────────
+function DischargePage({ branch }) {
+  const [selected, setSelected] = useState(null);
+  const [form, setForm] = useState({ date:'', summary:'', followup:'' });
+  const fp = getFilteredPatients(branch);
+
+  const process = () => { alert(`${selected.name} discharged successfully!`); setSelected(null); };
+
+  return (
+    <div>
+      <PageHeader title="Discharge Management" sub={`${BRANCHES[branch]?.label}`}
+        actions={[<Btn key="dl" onClick={()=>downloadCSV(fp,'discharge.csv')}>↓ Download</Btn>]}
+      />
+      <Card padding="0">
+        <Table
+          data={fp}
+          columns={[
+            { label:'Patient', render:r=><div><div style={{fontWeight:600}}>{r.name}</div><div style={{fontSize:11,color:'#9ca3af'}}>{r.uhid}</div></div> },
+            { label:'Ward', key:'ward' },
+            { label:'Branch', render:r=><BranchPill branch={r.branch}/> },
+            { label:'Type', render:r=><Badge variant={r.admType==='Cash'?'teal':'blue'}>{r.admType}</Badge> },
+            { label:'Expected DOD', render:r=>r.dod?new Date(r.dod).toLocaleDateString('en-IN'):<Badge variant="amber">Not Set</Badge> },
+            { label:'Bill', render:r=><span style={{fontWeight:600}}>{fmt(r.bills)}</span> },
+            { label:'Status', render:r=><Badge variant={r.status==='Critical'?'red':r.status==='Recovered'?'green':r.status==='Stable'?'teal':'blue'}>{r.status}</Badge> },
+            { label:'', render:r=><Btn size="sm" variant="primary" onClick={()=>setSelected(r)}>Process</Btn> },
+          ]}
+        />
+      </Card>
+
+      <Modal open={!!selected} onClose={()=>setSelected(null)} title={`Discharge — ${selected?.name}`}>
+        {selected && <>
+          <Alert type="warn">Confirm all bills are cleared before processing discharge.</Alert>
+          <Field label="Discharge Date"><Input type="date" value={form.date} onChange={e=>setForm(f=>({...f,date:e.target.value}))} /></Field>
+          <Field label="Discharge Summary">
+            <textarea value={form.summary} onChange={e=>setForm(f=>({...f,summary:e.target.value}))} rows={3}
+              placeholder="Add discharge summary notes…"
+              style={{width:'100%',padding:'8px 12px',border:'1px solid #d1d5db',borderRadius:8,fontSize:13,resize:'vertical',boxSizing:'border-box'}} />
+          </Field>
+          <Field label="Follow-up Date"><Input type="date" value={form.followup} onChange={e=>setForm(f=>({...f,followup:e.target.value}))} /></Field>
+          <div style={{display:'flex',gap:8,justifyContent:'flex-end',marginTop:8}}>
+            <Btn onClick={()=>setSelected(null)}>Cancel</Btn>
+            <Btn variant="primary" onClick={process}>Confirm Discharge</Btn>
+          </div>
+        </>}
+      </Modal>
+    </div>
+  );
+}
+
+// ─── Root SuperAdmin Dashboard ────────────────────────────────────────────────
+export default function SuperAdminDashboard() {
+  const { user, logout } = useAuth();
+  const [page, setPage]     = useState('dashboard');
+  const [branch, setBranch] = useState('all');
+
+  const pages = {
+    dashboard: <DashboardHome branch={branch} />,
+    patients:  <PatientsPage branch={branch} />,
+    reports:   <ReportsPage branch={branch} />,
+    invoices:  <InvoicesPage branch={branch} />,
+    billing:   <BillingPage branch={branch} />,
+    users:     <UsersPage />,
+    pharmacy:  <PharmacyPage branch={branch} />,
+    discharge: <DischargePage branch={branch} />,
+  };
+
+  return (
+    <div style={{ display:'flex', fontFamily:"'Segoe UI',system-ui,sans-serif", background:'#f8fafc', minHeight:'100vh' }}>
+      <Sidebar page={page} setPage={setPage} branch={branch} setBranch={setBranch} user={user} onLogout={logout} />
+      <main style={{ marginLeft:230, flex:1, padding:'28px 32px', minHeight:'100vh' }}>
+        {pages[page] || pages.dashboard}
+      </main>
     </div>
   );
 }

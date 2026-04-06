@@ -1,4 +1,4 @@
-export const blankPatient=()=>({patientName:"",guardianName:"",gender:"",dob:"",ageYY:"",ageMM:"",ageDD:"",bloodGroup:"",maritalStatus:"",phone:"",altPhone:"",email:"",address:"",remarks:"",allergies:"",tpa:"",tpaCard:"",tpaValidity:"",tpaCardType:"",tpaPanelCardNo:"",tpaPanelValidity:"",nationalId:""});
+export const blankPatient=()=>({patientName:"",guardianName:"",gender:"",dob:"",ageYY:"",ageMM:"",ageDD:"",bloodGroup:"",maritalStatus:"",phone:"",altPhone:"",email:"",address:"",remarks:"",allergies:"",tpa:"",tpaCard:"",tpaValidity:"",tpaCardType:"",tpaPanelCardNo:"",tpaPanelValidity:"",nationalId:"",payMode:"Cash",payType:"cash"});
 export const blankDischarge=()=>({dischargeStatus:"",doa:"",dod:"",roomNo:"",bedNo:"",billDate:"",wardName:"",doctorName:"",diagnosis:"",department:""});
 export const blankBilling=()=>({discount:"",advance:"",paidNow:"",paymentMode:""});
 export const blankSvc=()=>({type:"",code:"",title:"",rate:"",qty:"1"});
