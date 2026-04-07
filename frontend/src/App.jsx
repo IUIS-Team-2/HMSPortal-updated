@@ -1,5 +1,4 @@
-import { useState, createContext, useContext } from "react";
-import { ToastContainer } from "./components/ui/Toast";
+import { useState, useEffect } from "react";
 import { T, NAV_PAGES } from "./data/constants";
 import { LOCATION_DB } from "./data/mockDb";
 import { blankPatient, blankDischarge, blankBilling, blankSvc } from "./utils/helpers";
@@ -15,144 +14,86 @@ import DischargePage from "./pages/DischargePage";
 import ServicesPage from "./pages/ServicesPage";
 import SummaryPage from "./pages/SummaryPage";
 import PatientsHistoryPage from "./pages/PatientsHistoryPage";
+import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import MedicalHistoryPage from "./pages/MedicalHistoryPage";
 import LoginPage from "./pages/LoginPage";
-import UserManagementPage from "./pages/UserManagementPage";
 
 // Modals
 import UHIDScreen from "./modals/UHIDScreen";
 import PrintModal from "./modals/PrintModal";
 import PatientDetailModal from "./modals/PatientDetailModal";
 
-// Admin Panel (Super Admin dark dashboard)
-import AdminPanel from "./components/AdminPanel";
-
-// ─── Auth Context (keeps LoginPage's useAuth() working) ───────────────────────
-export const AuthContext = createContext(null);
-export function useAuth() { return useContext(AuthContext); }
-
-// ─── All users — seed + localStorage created users ────────────────────────────
-const SEED_USERS = [
-  { id:"superadmin",   username:"superadmin",    password:"admin123",  role:"superadmin", name:"Super Admin",       branch:"laxmi", locations:["laxmi"] },
-  { id:"admin_laxmi",  username:"admin.laxmi",   password:"laxmi123",  role:"admin",      name:"Admin Laxmi Nagar", branch:"laxmi", locations:["laxmi"] },
-  { id:"admin_raya",   username:"admin.raya",    password:"raya123",   role:"admin",      name:"Admin Raya",        branch:"raya",  locations:["raya"]  },
-  { id:"bill_laxmi",   username:"billing.laxmi", password:"bill123",   role:"billing",    name:"Billing Staff",     branch:"laxmi", locations:["laxmi"], dept:"Billing"  },
-  { id:"pharma_raya",  username:"pharma.raya",   password:"pharma123", role:"pharmacy",   name:"Pharmacy Staff",    branch:"raya",  locations:["raya"],  dept:"Pharmacy" },
-];
-
-function getAllUsers() {
-  const base = [...SEED_USERS];
-  try {
-    const admins    = JSON.parse(localStorage.getItem("hms_admins")     || "[]");
-    const deptUsers = JSON.parse(localStorage.getItem("hms_dept_users") || "[]");
-    const ids = new Set(base.map(u => u.username));
-    [...admins, ...deptUsers].forEach(u => {
-      if (!ids.has(u.id) && !ids.has(u.username)) {
-        base.push({ ...u, username: u.id, locations: [u.branch] });
-        ids.add(u.id);
-      }
-    });
-  } catch {}
-  return base;
-}
-
-// ─── Root App ─────────────────────────────────────────────────────────────────
 export default function App() {
-
-  // ── Auth state ──────────────────────────────────────────────────────────────
-  const [loggedIn, setLoggedIn] = useState(() => sessionStorage.getItem("loggedIn") === "true");
-  const [currentUser, setCurrentUser] = useState(() => {
-    try { return JSON.parse(sessionStorage.getItem("currentUser")); } catch { return null; }
-  });
-
-  // ── HMS state ────────────────────────────────────────────────────────────────
-  const [locId, setLocId] = useState(() => sessionStorage.getItem("locId") || "laxmi");
-  const [page, setPage] = useState(() => {
-    const savedPage = sessionStorage.getItem("page");
-    const user = (() => { try { return JSON.parse(sessionStorage.getItem("currentUser")); } catch { return null; } })();
-    if (savedPage) return savedPage;
-    return user?.role === "superadmin" ? "superadmin" : "patient";
-  });
-  const [subPage, setSubPage]               = useState("search");
-  const [uhid, setUhid]                     = useState(null);
-  const [admNo, setAdmNo]                   = useState(1);
-  const [showUHID, setShowUHID]             = useState(false);
-  const [isReturning, setIsReturning]       = useState(false);
-  const [patientDone, setPatientDone]       = useState(false);
-  const [dischargeDone, setDischargeDone]   = useState(false);
-  const [servicesDone, setServicesDone]     = useState(false);
-  const [showPrint, setShowPrint]           = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [locId, setLocId] = useState("laxmi");
+  const [page, setPage] = useState("patient");
+  const [subPage, setSubPage] = useState("search");
+  const [uhid, setUhid] = useState(null);
+  const [admNo, setAdmNo] = useState(1);
+  const [showUHID, setShowUHID] = useState(false);
+  const [isReturning, setIsReturning] = useState(false);
+  const [patientDone, setPatientDone] = useState(false);
+  const [dischargeDone, setDischargeDone] = useState(false);
+  const [servicesDone, setServicesDone] = useState(false);
+  const [showPrint, setShowPrint] = useState(false);
   const [showPatientDetail, setShowPatientDetail] = useState(null);
-  const [printRequests, setPrintRequests]   = useState([]);
+  const [printRequests, setPrintRequests] = useState([]);
 
-  const [patient, setPatient]               = useState(blankPatient());
-  const [medicalHistory, setMedicalHistory] = useState({
-    previousDiagnosis:"", pastSurgeries:"", currentMedications:"",
-    treatingDoctor:"", knownAllergies:"", chronicConditions:"",
-    familyHistory:"", smokingStatus:"", alcoholUse:"", notes:""
-  });
-  const [medicalDone, setMedicalDone]       = useState(false);
-  const [discharge, setDischarge]           = useState(blankDischarge());
-  const [svcs, setSvcs]                     = useState([blankSvc()]);
-  const [billing, setBilling]               = useState(blankBilling());
-  const [errs, setErrs]                     = useState({});
-  const [db, setDb]                         = useState(JSON.parse(JSON.stringify(LOCATION_DB)));
+  const [patient, setPatient] = useState(blankPatient());
+  const [medicalHistory, setMedicalHistory] = useState({ previousDiagnosis: "", pastSurgeries: "", currentMedications: "", treatingDoctor: "", knownAllergies: "", chronicConditions: "", familyHistory: "", smokingStatus: "", alcoholUse: "", notes: "" });
+  const [medicalDone, setMedicalDone] = useState(false);
+  const [discharge, setDischarge] = useState(blankDischarge());
+  const [svcs, setSvcs] = useState([blankSvc()]);
+  const [billing, setBilling] = useState(blankBilling());
+  const [errs, setErrs] = useState({});
+
+  const [db, setDb] = useState(JSON.parse(JSON.stringify(LOCATION_DB)));
 
   const currentDb = db[locId];
 
-  // ── login() — called by LoginPage via useAuth().login(username, password) ───
-  const login = (username, password) => {
-    const all   = getAllUsers();
-    const found = all.find(u =>
-      (u.username === username || u.id === username) && u.password === password
-    );
-    if (!found)                      return { success: false, error: "Invalid credentials" };
-    if (found.status === "inactive") return { success: false, error: "Account deactivated. Contact admin." };
-
-    const loc = found.locations?.[0] || found.branch || "laxmi";
-    setCurrentUser(found);
-    setLocId(loc);
-    setLoggedIn(true);
-    sessionStorage.setItem("loggedIn", "true");
-    sessionStorage.setItem("currentUser", JSON.stringify(found));
-    sessionStorage.setItem("locId", loc);
-
-    if (found.role === "superadmin") {
-      setPage("superadmin");
-      sessionStorage.setItem("page", "superadmin");
-    } else {
-      setPage("patient");
-      setSubPage("search");
-      sessionStorage.setItem("page", "patient");
-    }
-    return { success: true };
-  };
-
-  // ── logout ────────────────────────────────────────────────────────────────────
-  const logout = () => {
-    setLoggedIn(false);
-    setCurrentUser(null);
-    resetAll();
-    setPrintRequests([]);
-    sessionStorage.clear();
-  };
-
-  // ── HMS helpers ───────────────────────────────────────────────────────────────
   const resetAll = () => {
-    setPage("patient"); setSubPage("search"); setUhid(null); setShowUHID(false);
-    setPatientDone(false); setMedicalDone(false); setDischargeDone(false); setServicesDone(false);
-    setPatient(blankPatient()); setDischarge(blankDischarge()); setSvcs([]); setBilling(blankBilling());
+    setPage("patient");
+    setSubPage("search");
+    setUhid(null);
+    setShowUHID(false);
+    setPatientDone(false);
+    setMedicalDone(false);
+    setDischargeDone(false);
+    setServicesDone(false);
+    setPatient(blankPatient());
+    setDischarge(blankDischarge());
+    setSvcs([]);
+    setBilling(blankBilling());
     setErrs({});
-    setMedicalHistory({ previousDiagnosis:"", pastSurgeries:"", currentMedications:"", treatingDoctor:"", knownAllergies:"", chronicConditions:"", familyHistory:"", smokingStatus:"", alcoholUse:"", notes:"" });
+    setMedicalHistory({ previousDiagnosis: "", pastSurgeries: "", currentMedications: "", treatingDoctor: "", knownAllergies: "", chronicConditions: "", familyHistory: "", smokingStatus: "", alcoholUse: "", notes: "" });
   };
 
   const switchLoc = id => { setLocId(id); resetAll(); setShowPatientDetail(null); };
+
+  const handleLogin = (user, loc) => {
+    setCurrentUser(user);
+    setLocId(loc || "laxmi");
+    setLoggedIn(true);
+    if (user.role === "superadmin") {
+      setPage("superadmin");
+    } else {
+      setPage("patient");
+      setSubPage("search");
+    }
+  };
+
+  useEffect(() => { setLoginCallback(handleLogin); });
+  const endSession = () => { resetAll(); };
 
   const syncDb = (currentUhid, currentAdmNo, dataKey, dataValue) => {
     setDb(prev => {
       const nextDb = JSON.parse(JSON.stringify(prev));
       const p = nextDb[locId].find(x => x.uhid === currentUhid);
-      if (p) { const a = p.admissions.find(x => x.admNo === currentAdmNo); if (a) a[dataKey] = dataValue; }
+      if (p) {
+        const a = p.admissions.find(x => x.admNo === currentAdmNo);
+        if (a) a[dataKey] = dataValue;
+      }
       return nextDb;
     });
   };
@@ -170,281 +111,206 @@ export default function App() {
 
   const handleDischargeFromHistory = (patientObj, admObj) => {
     const { admissions, ...pd } = patientObj; setPatient(pd); setUhid(patientObj.uhid); setAdmNo(admObj.admNo); setIsReturning(true);
-    setDischarge({ ...blankDischarge(), ...(admObj.discharge || {}) });
-    setSvcs(admObj.services && admObj.services.length ? admObj.services : []);
-    setBilling({ ...blankBilling(), ...(admObj.billing || {}) });
-    setPatientDone(true); setDischargeDone(false); setServicesDone(false);
-    setShowPatientDetail(null); setShowUHID(false); setPage("discharge");
+    setDischarge({ ...blankDischarge(), ...(admObj.discharge || {}) }); setSvcs(admObj.services && admObj.services.length ? admObj.services : []); setBilling({ ...blankBilling(), ...(admObj.billing || {}) });
+    setPatientDone(true); setDischargeDone(false); setServicesDone(false); setShowPatientDetail(null); setShowUHID(false); setPage("discharge");
   };
 
   const handleGenerateBillFromHistory = (patientObj, admObj) => {
     const { admissions, ...pd } = patientObj; setPatient(pd); setUhid(patientObj.uhid); setAdmNo(admObj.admNo); setIsReturning(true);
-    setDischarge({ ...blankDischarge(), ...(admObj.discharge || {}) });
-    setSvcs(admObj.services && admObj.services.length ? admObj.services : []);
-    setBilling({ ...blankBilling(), ...(admObj.billing || {}) });
-    setPatientDone(true); setDischargeDone(true); setServicesDone(false);
-    setShowPatientDetail(null); setShowUHID(false); setPage("services");
+    setDischarge({ ...blankDischarge(), ...(admObj.discharge || {}) }); setSvcs(admObj.services && admObj.services.length ? admObj.services : []); setBilling({ ...blankBilling(), ...(admObj.billing || {}) });
+    setPatientDone(true); setDischargeDone(true); setServicesDone(false); setShowPatientDetail(null); setShowUHID(false); setPage("services");
   };
 
   const handleSetExpectedDod = (uhidToUpdate, admNoToUpdate, date) => {
     setDb(prev => {
       const nextDb = JSON.parse(JSON.stringify(prev));
-      nextDb[locId].forEach(p => {
-        if (p.uhid === uhidToUpdate) p.admissions.forEach(a => {
-          if (a.admNo === admNoToUpdate) { if (!a.discharge) a.discharge = {}; a.discharge.expectedDod = date; }
-        });
-      });
+      nextDb[locId].forEach(p => { if (p.uhid === uhidToUpdate) p.admissions.forEach(a => { if (a.admNo === admNoToUpdate) { if (!a.discharge) a.discharge = {}; a.discharge.expectedDod = date; } }); });
       return nextDb;
     });
   };
 
   const validatePatient = () => {
-    const e = {};
-    if (!patient.patientName.trim())  e.patientName  = "Required";
-    if (!patient.guardianName.trim()) e.guardianName = "Required";
-    if (!patient.gender)              e.gender       = "Required";
-    if (!patient.phone || patient.phone.replace(/\D/g,"").length !== 10) e.phone = "Must be 10 digits";
-    if (!patient.nationalId.trim())   e.nationalId   = "Required";
-    if (!patient.address.trim())      e.address      = "Required";
-    setErrs(e); return !Object.keys(e).length;
+    const e = {}; if (!patient.patientName.trim()) e.patientName = "Required"; if (!patient.guardianName.trim()) e.guardianName = "Required"; if (!patient.gender) e.gender = "Required"; if (!patient.phone || patient.phone.replace(/\D/g, "").length !== 10) e.phone = "Must be 10 digits"; if (!patient.email || !patient.email.includes("@")) e.email = "Valid email required"; if (!patient.nationalId.trim()) e.nationalId = "Required"; if (!patient.address.trim()) e.address = "Required"; setErrs(e); return !Object.keys(e).length;
   };
 
   const handleRegister = () => {
     if (!validatePatient()) return;
     const newUhid = "UHID-" + Math.floor(1000000 + Math.random() * 9000000);
     setUhid(newUhid); setAdmNo(1); setIsReturning(false); setShowUHID(true);
-    const newPat = { ...patient, uhid: newUhid, admissions: [{ admNo:1, dateTime: new Date().toISOString(), discharge: blankDischarge(), services: [], billing: blankBilling() }] };
+    const newPat = { ...patient, uhid: newUhid, admissions: [{ admNo: 1, dateTime: new Date().toISOString(), discharge: blankDischarge(), services: [], billing: blankBilling() }] };
     setDb(prev => ({ ...prev, [locId]: [newPat, ...prev[locId]] }));
   };
 
   const handleUHIDContinue   = () => { setPatientDone(true); setShowUHID(false); setPage("medical"); };
   const handleUHIDDashboard  = () => { setPatientDone(true); setShowUHID(false); setPage("patient"); setSubPage("search"); };
-  const handleUHIDNewPatient = () => { resetAll(); setSubPage("form"); };
+  const handleUHIDNewPatient = () => { endSession(); setSubPage("form"); };
 
-  const handleSaveMedical   = () => { syncDb(uhid, admNo, "medicalHistory", medicalHistory); setMedicalDone(true); setPage("discharge"); };
-  const handleSaveDischarge = () => { syncDb(uhid, admNo, "discharge", discharge); setDischargeDone(true); setPage("services"); };
-
-  const handleSaveServices = (updatedSvcs, updatedBilling) => {
+  const handleSaveMedical = () => { syncDb(uhid, admNo, "medicalHistory", medicalHistory); setMedicalDone(true); setPage("discharge"); };
+  const handleSaveMedHistoryFromHistory = (uhidVal, admNoVal, data) => { setDb(prev => { const next = JSON.parse(JSON.stringify(prev)); const p = next[locId].find(x => x.uhid === uhidVal); if (p) { const a = p.admissions.find(x => x.admNo === admNoVal); if (a) a.medicalHistory = data; } return next; }); };
+  const handleSaveDischarge  = () => { syncDb(uhid, admNo, 'discharge', discharge); setDischargeDone(true); setPage("services"); };
+  const handleSaveServices   = (updatedSvcs, updatedBilling) => {
     setSvcs(updatedSvcs); setBilling(updatedBilling);
-    syncDb(uhid, admNo, "services", updatedSvcs); syncDb(uhid, admNo, "billing", updatedBilling);
+    syncDb(uhid, admNo, 'services', updatedSvcs); syncDb(uhid, admNo, 'billing', updatedBilling);
     setServicesDone(true); setPage("summary");
   };
 
+  // Invoice print request: branch staff requests → super admin approves
   const handleRequestPrint = (req) => {
     setPrintRequests(prev => [...prev, { ...req, requestedAt: new Date().toISOString() }]);
   };
 
-  const handleViewBill = (req) => {
-    setShowPrint(true); setUhid(req.uhid);
-    setPatient(req.patient || patient); setDischarge(req.discharge || discharge);
-    setSvcs(req.svcs || svcs); setBilling(req.billing || billing);
-    setLocId(req.locId); setAdmNo(req.admNo);
-  };
-
   const handleApprovePrint = (req, action) => {
-    setPrintRequests(prev => prev.filter(r => !(r.uhid===req.uhid && r.admNo===req.admNo && r.locId===req.locId)));
+    setPrintRequests(prev => prev.filter(r => !(r.uhid === req.uhid && r.admNo === req.admNo && r.locId === req.locId)));
     if (action === "approve") {
-      setShowPrint(true); setUhid(req.uhid);
-      setPatient(req.patient || patient); setDischarge(req.discharge || discharge);
-      setSvcs(req.svcs || svcs); setBilling(req.billing || billing);
-      setLocId(req.locId); setAdmNo(req.admNo);
+      setShowPrint(true);
+      setUhid(req.uhid);
+      setPatient(req.patient || patient);
+      setDischarge(req.discharge || discharge);
+      setSvcs(req.svcs || svcs);
+      setBilling(req.billing || billing);
+      setLocId(req.locId);
+      setAdmNo(req.admNo);
     }
   };
 
-  // ── Not logged in → Login page ────────────────────────────────────────────────
-  if (!loggedIn) {
-    return (
-      <AuthContext.Provider value={{ user: currentUser, login, logout }}>
-        <LoginPage />
-      </AuthContext.Provider>
-    );
-  }
+  const canNav = id => ({ patient: true, medical: patientDone, discharge: patientDone && medicalDone, services: patientDone && medicalDone && dischargeDone, summary: patientDone && medicalDone && dischargeDone && servicesDone }[id] || false);
+  const isDone = id => ({ patient: patientDone, medical: medicalDone, discharge: dischargeDone, services: servicesDone }[id] || false);
+  const navTo  = id => { if (!canNav(id)) return; setShowUHID(false); setPage(id); };
 
-  // ── Super Admin → Dark AdminPanel ─────────────────────────────────────────────
+  if (!loggedIn) return <LoginPage onLogin={handleLogin} />;
+
+  // ── SUPER ADMIN: render FULLSCREEN, no header/sidebar ──
   if (page === "superadmin") {
     return (
-      <AuthContext.Provider value={{ user: currentUser, login, logout }}>
+      <>
         {showPrint && (
           <PrintModal uhid={uhid} patient={patient} discharge={discharge}
             svcs={svcs} billing={billing} locId={locId} admNo={admNo}
             onClose={() => setShowPrint(false)} />
         )}
-        <AdminPanel
-          initialRole="superadmin"
+        <SuperAdminDashboard
           db={db}
           printRequests={printRequests}
           onApprovePrint={handleApprovePrint}
-          onViewBill={handleViewBill}
-          onLogout={logout}
+          onLogout={() => { setLoggedIn(false); setCurrentUser(null); resetAll(); setPrintRequests([]); }}
         />
-      </AuthContext.Provider>
+      </>
     );
   }
 
-  // ── Admin / Employee → Original HMS Dashboard ─────────────────────────────────
+  // ── BRANCH STAFF: normal layout with header + sidebar ──
   return (
-    <AuthContext.Provider value={{ user: currentUser, login, logout }}>
-      <ToastContainer />
-
+    <>
       {showPrint && (
         <PrintModal uhid={uhid} patient={patient} discharge={discharge}
           svcs={svcs} billing={billing} locId={locId} admNo={admNo}
           onClose={() => setShowPrint(false)} />
       )}
-
-      {showUHID && (
-        <UHIDScreen uhid={uhid} admNo={admNo} isReturning={isReturning}
-          onContinue={handleUHIDContinue}
-          onDashboard={handleUHIDDashboard}
-          onNewPatient={handleUHIDNewPatient} />
-      )}
-
       {showPatientDetail && (
-        <PatientDetailModal
-          patient={showPatientDetail}
+        <PatientDetailModal patient={showPatientDetail}
           onClose={() => setShowPatientDetail(null)}
-          onNewAdmission={handleNewAdmission}
-          onDischarge={handleDischargeFromHistory}
-          onGenerateBill={handleGenerateBillFromHistory}
-          onSetExpectedDod={handleSetExpectedDod}
-          locId={locId} />
+          onDischarge={handleDischargeFromHistory} />
       )}
 
-      {/* ── Top Navbar ── */}
-      <div style={{ position:"fixed", top:0, left:0, right:0, zIndex:100,
-        background:T.primary, borderBottom:`1px solid rgba(255,255,255,.08)`,
-        display:"flex", alignItems:"center", justifyContent:"space-between",
-        padding:"0 24px", height:56 }}>
-        <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-          <img src="/logo192.png" alt="logo" style={{ width:32, height:32, borderRadius:8, objectFit:"cover" }} />
+      <header className="hdr">
+        <div className="hdr-left">
+          <div className="hdr-logo">
+            <img src="/logo192.png" alt="logo" style={{ width: 34, height: 34, borderRadius: 8, objectFit: "cover" }} />
+          </div>
           <div>
-            <div style={{ color:"#fff", fontWeight:700, fontSize:14 }}>Sangi Hospital</div>
-            <div style={{ color:"rgba(255,255,255,.45)", fontSize:10, textTransform:"uppercase", letterSpacing:1 }}>IPD Portal</div>
+            <p className="hdr-name">Sangi Hospital</p>
+            <p className="hdr-sub">IPD Portal</p>
           </div>
         </div>
 
-        {/* Location switcher */}
-        <div style={{ display:"flex", gap:6 }}>
-          {[{id:"laxmi",label:"Lakshmi Nagar"},{id:"raya",label:"Raya"}].map(loc => (
-            <button key={loc.id} onClick={() => switchLoc(loc.id)}
-              style={{ padding:"5px 14px", borderRadius:20, border:"none", cursor:"pointer", fontSize:12, fontWeight:600,
-                background: locId===loc.id ? T.accent : "rgba(255,255,255,.08)",
-                color: locId===loc.id ? T.primary : "rgba(255,255,255,.6)", transition:"all .15s" }}>
-              {loc.label}
-            </button>
-          ))}
-        </div>
-
-        <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+        <div className="hdr-right">
+          {uhid && <div className="hdr-uhid"><span className="hdr-uhid-label">UHID</span>{uhid}</div>}
           <LiveDate />
-          <div style={{ textAlign:"right" }}>
-            <div style={{ color:"#fff", fontSize:13, fontWeight:600 }}>{currentUser?.name}</div>
-            <div style={{ color:"rgba(255,255,255,.45)", fontSize:11 }}>
-              {locId === "laxmi" ? "Lakshmi Nagar" : "Raya"} Branch
+          {currentUser && (
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginLeft: 12 }}>
+
+              <div style={{ fontSize: 12, lineHeight: 1.4, textAlign: "right" }}>
+                <div style={{ fontWeight: 700, color: "#fff" }}>{currentUser.name}</div>
+                <div style={{ color: "rgba(255,255,255,.5)" }}>
+                  {locId === "laxmi" ? "Laxmi Nagar Branch" : "Raya Branch"}
+                </div>
+              </div>
+              <button
+                onClick={() => { setLoggedIn(false); setCurrentUser(null); resetAll(); }}
+                style={{ padding: "6px 14px", borderRadius: 8, background: "rgba(255,255,255,.1)", border: "1px solid rgba(255,255,255,.2)", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+                Logout
+              </button>
+            </div>
+          )}
+        </div>
+      </header>
+
+      <div className="layout">
+        <aside className="sidebar">
+          <div className="sidebar-top">
+            <div className="sidebar-section-label">Registration Steps</div>
+            {NAV_PAGES.map((p, i) => {
+              const locked = !canNav(p.id); const active = page === p.id && !showUHID; const done = isDone(p.id);
+              return (
+                <div key={p.id} className={`nav-item${active ? " active" : ""}${done && !active ? " done" : ""}${locked ? " locked" : ""}`} onClick={() => navTo(p.id)}>
+                  <div className="nav-icon">{locked ? <Ico d={IC.lock} size={15} sw={2} /> : <Ico d={PAGE_ICONS[p.icon]} size={15} sw={2} />}</div>
+                  <span className="nav-label">{p.label}</span>
+                  <span className="nav-step-num">
+                    {p.id === "medical" && !medicalDone && patientDone
+                      ? <span style={{ fontSize: 9, color: T.amber }}>!</span>
+                      : done ? <Ico d={IC.check} size={10} sw={2.5} /> : i + 1}
+                  </span>
+                </div>
+              );
+            })}
+            <div className="sidebar-divider" />
+            <div className="sidebar-section-label" style={{ marginTop: 8 }}>Records</div>
+            <div className={`sidebar-hist-item${page === "history" ? " active" : ""}`} onClick={() => { setShowUHID(false); setPage("history"); }}>
+              <div className="sidebar-hist-icon"><Ico d={IC.users} size={15} sw={2} /></div>
+              <span className="sidebar-hist-label">Patients History</span>
             </div>
           </div>
-          <button onClick={logout}
-            style={{ padding:"6px 16px", borderRadius:8, border:"1px solid rgba(255,255,255,.2)",
-              background:"transparent", color:"#fff", fontWeight:600, fontSize:12, cursor:"pointer" }}>
-            Logout
-          </button>
-        </div>
-      </div>
-
-      {/* ── Layout ── */}
-      <div style={{ display:"flex", paddingTop:56, minHeight:"100vh", background:T.bgPage }}>
-
-        {/* Left Sidebar */}
-        <div style={{ width:220, background:"#fff", borderRight:`1px solid ${T.border}`,
-          position:"fixed", top:56, bottom:0, overflowY:"auto", padding:"24px 0" }}>
-
-          <div style={{ padding:"0 16px 12px", fontSize:10, fontWeight:700, color:T.textLight, letterSpacing:".08em" }}>
-            REGISTRATION STEPS
-          </div>
-
-          {NAV_PAGES.map((p, i) => {
-            const done   = [patientDone, medicalDone, dischargeDone, servicesDone, true][i];
-            const active = page === p.id;
-            const locked = i > 0 && ![patientDone, medicalDone, dischargeDone, servicesDone][i-1];
-            return (
-              <button key={p.id} onClick={() => !locked && setPage(p.id)}
-                style={{ display:"flex", alignItems:"center", gap:12, width:"100%", padding:"10px 16px",
-                  border:"none", background:active?T.bgTint:"transparent",
-                  borderLeft:active?`3px solid ${T.accent}`:"3px solid transparent",
-                  color:locked?T.textLight:active?T.primaryLight:T.textMid,
-                  cursor:locked?"not-allowed":"pointer", fontSize:13, fontWeight:active?700:500,
-                  opacity:locked?0.5:1, textAlign:"left", transition:"all .15s" }}>
-                <div style={{ width:24, height:24, borderRadius:"50%", flexShrink:0,
-                  background:done&&!active?T.green:active?T.primaryLight:T.border,
-                  display:"flex", alignItems:"center", justifyContent:"center",
-                  color:"#fff", fontSize:11, fontWeight:700 }}>
-                  {done && !active ? "✓" : i+1}
-                </div>
-                {p.label}
+          {uhid && (
+            <div className="sidebar-bottom">
+              <div className="uhid-card" style={{ marginBottom: 12 }}>
+                <div className="uhid-card-label">Current UHID</div>
+                <div className="uhid-card-val">{uhid}</div>
+                <div className="uhid-card-sub">{patient.patientName || "Patient"}{admNo > 1 ? ` · Adm #${admNo}` : ""}</div>
+              </div>
+              <button onClick={endSession} style={{ width: "100%", padding: "10px", borderRadius: "10px", background: T.redTint, color: T.red, border: `1px solid ${T.red}`, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+                <Ico d={IC.cross} size={14} sw={2.5} /> Close Patient
               </button>
-            );
-          })}
+            </div>
+          )}
+        </aside>
 
-          <div style={{ padding:"20px 16px 8px", fontSize:10, fontWeight:700, color:T.textLight, letterSpacing:".08em" }}>
-            RECORDS
-          </div>
-          <button onClick={() => setPage("history")}
-            style={{ display:"flex", alignItems:"center", gap:12, width:"100%", padding:"10px 16px",
-              border:"none", background:page==="history"?T.bgTint:"transparent",
-              borderLeft:page==="history"?`3px solid ${T.accent}`:"3px solid transparent",
-              color:page==="history"?T.primaryLight:T.textMid,
-              cursor:"pointer", fontSize:13, fontWeight:page==="history"?700:500, textAlign:"left" }}>
-            <div style={{ width:24, height:24, borderRadius:"50%", background:T.primaryLight,
-              display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", fontSize:11 }}>📋</div>
-            Patients History
-          </button>
-        </div>
-
-        {/* Main Content */}
-        <div style={{ marginLeft:220, flex:1, padding:"28px 32px" }}>
-
-          {/* ── FIXED: PatientFormPage now gets data/setData/onSubmit ── */}
-          {page==="patient" && subPage==="search" &&
-            <SearchPage db={currentDb} locId={locId}
-              onNewPatient={() => setSubPage("form")}
-              onSelectPatient={p => setShowPatientDetail(p)} />}
-
-          {page==="patient" && subPage==="form" &&
-            <PatientFormPage
-              data={patient}
-              setData={setPatient}
-              errs={errs}
-              onSubmit={handleRegister}
-              onBack={() => setSubPage("search")} />}
-
-          {page==="medical" &&
-            <MedicalHistoryPage medicalHistory={medicalHistory} setMedicalHistory={setMedicalHistory}
-              onSave={handleSaveMedical} onBack={() => setPage("patient")} />}
-
-          {page==="discharge" &&
-            <DischargePage discharge={discharge} setDischarge={setDischarge}
-              onSave={handleSaveDischarge} onBack={() => setPage("medical")} />}
-
-          {page==="services" &&
-            <ServicesPage svcs={svcs} setSvcs={setSvcs} billing={billing} setBilling={setBilling}
-              discharge={discharge} patient={patient} locId={locId}
-              onSave={handleSaveServices} onBack={() => setPage("discharge")} />}
-
-          {page==="summary" &&
-            <SummaryPage patient={patient} discharge={discharge} svcs={svcs} billing={billing}
-              uhid={uhid} admNo={admNo} locId={locId}
-              onRequestPrint={handleRequestPrint}
-              onNewPatient={() => { resetAll(); setSubPage("form"); }}
-              onDashboard={() => { resetAll(); setSubPage("search"); }} />}
-
-          {page==="history" &&
-            <PatientsHistoryPage db={currentDb} locId={locId}
-              currentUser={currentUser}
-              onDischarge={handleDischargeFromHistory}
-              onGenerateBill={handleGenerateBillFromHistory}
-              onSetExpectedDod={handleSetExpectedDod} />}
-        </div>
+        <main className="main" key={page + showUHID + subPage + locId}>
+          {page === "patient"  && !showUHID && subPage === "search" && <SearchPage db={currentDb} locId={locId} onNewAdmission={handleNewAdmission} onNewPatient={() => setSubPage("form")} />}
+          {page === "patient"  && !showUHID && subPage === "form"   && <PatientFormPage data={patient} setData={setPatient} onSubmit={handleRegister} errs={errs} onBack={() => setSubPage("search")} />}
+          {page === "patient"  && showUHID  && <UHIDScreen uhid={uhid} patient={patient} isReturning={isReturning} admNo={admNo} onContinue={handleUHIDContinue} onDashboard={handleUHIDDashboard} onNewPatient={handleUHIDNewPatient} />}
+          {page === "medical"  && <MedicalHistoryPage data={medicalHistory} setData={setMedicalHistory} onSave={handleSaveMedical} onSkip={handleSaveMedical} patient={patient} discharge={discharge} locId={locId} />}
+          {page === "discharge"&& <DischargePage data={discharge} setData={setDischarge} onSave={handleSaveDischarge} />}
+          {page === "services" && <ServicesPage svcs={svcs} setSvcs={setSvcs} billing={billing} setBilling={setBilling} onSave={handleSaveServices} />}
+          {page === "summary"  && <SummaryPage uhid={uhid} patient={patient} discharge={discharge} svcs={svcs} billing={billing} locId={locId} admNo={admNo} onPrint={() => setShowPrint(true)} />}
+          {page === "history"  && <PatientsHistoryPage db={currentDb} locId={locId} onBack={() => setPage("patient")} onDischarge={handleDischargeFromHistory} onGenerateBill={handleGenerateBillFromHistory} onSetExpectedDod={handleSetExpectedDod} onViewPatient={p => setShowPatientDetail(p)} onSaveMedHistory={handleSaveMedHistoryFromHistory} />}
+        </main>
       </div>
-    </AuthContext.Provider>
+    </>
   );
+}
+
+export const AuthContext = null;
+let _loginCallback = null;
+export function setLoginCallback(fn) { _loginCallback = fn; }
+export function useAuth() {
+  const { USERS } = require('./data/constants');
+  const user = (() => { try { return JSON.parse(sessionStorage.getItem("currentUser")); } catch { return null; } })();
+  const logout = () => { sessionStorage.clear(); window.location.reload(); };
+  const login = (username, password) => {
+    const found = USERS.find(u => u.id === username && u.password === password);
+    if (!found) return { success: false, error: 'Invalid credentials' };
+    if (_loginCallback) _loginCallback(found, found.branch || found.locations?.[0] || "laxmi");
+    return { success: true };
+  };
+  return { user, logout, login };
 }
