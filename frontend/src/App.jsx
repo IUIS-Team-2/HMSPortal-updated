@@ -15,6 +15,7 @@ import ServicesPage from "./pages/ServicesPage";
 import SummaryPage from "./pages/SummaryPage";
 import PatientsHistoryPage from "./pages/PatientsHistoryPage";
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
+import ManagementAdminDashboard from './pages/Managementadmindashboard';
 import MedicalHistoryPage from "./pages/MedicalHistoryPage";
 import LoginPage from "./pages/LoginPage";
 
@@ -77,6 +78,8 @@ export default function App() {
     setLoggedIn(true);
     if (user.role === "superadmin") {
       setPage("superadmin");
+    } else if (user.role === "managementadmin") {
+      setPage("managementadmin");
     } else {
       setPage("patient");
       setSubPage("search");
@@ -198,6 +201,15 @@ export default function App() {
     );
   }
 
+  if (page === "managementadmin") {
+    return (
+      <ManagementAdminDashboard
+        db={db}
+        onLogout={() => { setLoggedIn(false); setCurrentUser(null); resetAll(); }}
+      />
+    );
+  }
+
   // ── BRANCH STAFF: normal layout with header + sidebar ──
   return (
     <>
@@ -303,13 +315,13 @@ export const AuthContext = null;
 let _loginCallback = null;
 export function setLoginCallback(fn) { _loginCallback = fn; }
 export function useAuth() {
-  const { USERS } = require('./data/constants');
+  const { getAllUsers } = require('./data/constants');
   const user = (() => { try { return JSON.parse(sessionStorage.getItem("currentUser")); } catch { return null; } })();
   const logout = () => { sessionStorage.clear(); window.location.reload(); };
   const login = (username, password) => {
-    const found = USERS.find(u => u.id === username && u.password === password);
+    const found = getAllUsers().find(u => u.id === username && u.password === password);
     if (!found) return { success: false, error: 'Invalid credentials' };
-    if (_loginCallback) _loginCallback(found, found.branch || found.locations?.[0] || "laxmi");
+    if (_loginCallback) _loginCallback(found, found.branch || (found.locations && found.locations[0]) || "laxmi");
     return { success: true };
   };
   return { user, logout, login };

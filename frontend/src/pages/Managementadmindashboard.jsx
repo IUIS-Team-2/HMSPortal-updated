@@ -51,7 +51,7 @@ const NAV = [
 
 const fmt = (n) => "₹" + Number(n).toLocaleString("en-IN");
 
-export default function App() {
+export default function App({ db, onLogout }) {
   const [activeTab, setActiveTab] = useState("overview");
   const [branch, setBranch] = useState("Laxmi Nagar");
   const [collapsed, setCollapsed] = useState(false);
@@ -445,7 +445,7 @@ export default function App() {
         <div style={c.hdrRight}>
           <span style={c.roleBadge}>MGMT ADMIN</span>
           <div style={c.avatar}>MA</div>
-          <button style={c.logoutBtn}>Logout</button>
+          <button style={c.logoutBtn} onClick={onLogout}>Logout</button>
         </div>
       </header>
 
