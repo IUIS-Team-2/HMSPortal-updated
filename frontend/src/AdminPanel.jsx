@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { useAuth } from '../App';
+import { useAuth } from './App';
 import {
   PATIENTS, INVOICES, MEDICINES, HMS_USERS, BRANCHES, DEPARTMENTS,
   BILL_ITEMS, fmt, fmtDate, getFilteredPatients, getFilteredInvoices, downloadCSV,
-} from '../data/hmsData';
+} from './data/hmsData';
 import {
   Badge, BranchPill, StatCard, Card, CardHeader, Btn, Table,
   Modal, Field, Input, Select, TabBar, Alert, PageHeader, NavItem, OCEAN,
-} from '../components/ui';
+} from './components/ui';
 
 // ─── Nav config per role ──────────────────────────────────────────────────────
 const NAV_BY_ROLE = {

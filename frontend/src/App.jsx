@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
 import { T, NAV_PAGES } from "./data/constants";
 import { blankPatient, blankDischarge, blankBilling, blankSvc } from "./utils/helpers";
 import { Ico, IC, PAGE_ICONS } from "./components/ui/Icons";
@@ -27,6 +27,38 @@ import UHIDScreen from "./modals/UHIDScreen";
 import PrintModal from "./modals/PrintModal";
 import PatientDetailModal from "./modals/PatientDetailModal";
 
+import AdminPanel from "./AdminPanel";
+
+// ─── Auth Context (keeps LoginPage's useAuth() working) ───────────────────────
+export const AuthContext = createContext(null);
+export function useAuth() { return useContext(AuthContext); }
+
+// ─── All users — seed + localStorage created users ────────────────────────────
+const SEED_USERS = [
+  { id:"superadmin",   username:"superadmin",    password:"admin123",  role:"superadmin", name:"Super Admin",       branch:"laxmi", locations:["laxmi"] },
+  { id:"admin_laxmi",  username:"admin.laxmi",   password:"laxmi123",  role:"admin",      name:"Admin Laxmi Nagar", branch:"laxmi", locations:["laxmi"] },
+  { id:"admin_raya",   username:"admin.raya",    password:"raya123",   role:"admin",      name:"Admin Raya",        branch:"raya",  locations:["raya"]  },
+  { id:"bill_laxmi",   username:"billing.laxmi", password:"bill123",   role:"billing",    name:"Billing Staff",     branch:"laxmi", locations:["laxmi"], dept:"Billing"  },
+  { id:"pharma_raya",  username:"pharma.raya",   password:"pharma123", role:"pharmacy",   name:"Pharmacy Staff",    branch:"raya",  locations:["raya"],  dept:"Pharmacy" },
+];
+
+function getAllUsers() {
+  const base = [...SEED_USERS];
+  try {
+    const admins    = JSON.parse(localStorage.getItem("hms_admins")     || "[]");
+    const deptUsers = JSON.parse(localStorage.getItem("hms_dept_users") || "[]");
+    const ids = new Set(base.map(u => u.username));
+    [...admins, ...deptUsers].forEach(u => {
+      if (!ids.has(u.id) && !ids.has(u.username)) {
+        base.push({ ...u, username: u.id, locations: [u.branch] });
+        ids.add(u.id);
+      }
+    });
+  } catch {}
+  return base;
+}
+
+// ─── Root App ─────────────────────────────────────────────────────────────────
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
@@ -55,6 +87,26 @@ export default function App() {
   // 🌟 Database States
   const [db, setDb] = useState({ laxmi: [], raya: [] });
   const [masterServices, setMasterServices] = useState([]); 
+
+  // 🌟 FIX: Restored missing Sidebar Navigation Helpers
+  const isDone = (id) => {
+    if (id === 'patient') return patientDone;
+    if (id === 'medical') return medicalDone;
+    if (id === 'discharge') return dischargeDone;
+    if (id === 'services') return servicesDone;
+    return true;
+  };
+
+  const canNav = (id) => {
+    const steps = ["patient", "medical", "discharge", "services", "summary"];
+    const idx = steps.indexOf(id);
+    if (idx <= 0) return true;
+    const prev = steps[idx - 1];
+    return isDone(prev);
+  };
+
+  const navTo = (id) => { if (canNav(id)) setPage(id); };
+  const endSession = () => { resetAll(); setSubPage("search"); };
 
   // ==========================================
   // 🌟 THE MASTER DATA LOADER
@@ -128,13 +180,15 @@ export default function App() {
     setLocId(loc || "laxmi");
     setLoggedIn(true);
     sessionStorage.setItem("loggedIn", "true");
-    sessionStorage.setItem("currentUser", JSON.stringify(user));
+    
+    // 🌟 FIX: Used 'found' instead of undefined 'user'
+    sessionStorage.setItem("currentUser", JSON.stringify(found));
     sessionStorage.setItem("locId", loc || "laxmi");
     
-    loadDashboardData(user.role);
+    loadDashboardData(found.role);
 
-    if (user.role === "superadmin") {
-      setPage("superadmin");
+    if (found.role === "superadmin") {
+      setPage("superadmin"); sessionStorage.setItem("page", "superadmin");
     } else {
       setPage("patient");
       setSubPage("search");
@@ -380,9 +434,6 @@ export default function App() {
   const isDone = id => ({ patient: patientDone, medical: medicalDone, discharge: dischargeDone, services: servicesDone }[id] || false);
   const navTo  = id => { if (!canNav(id)) return; setShowUHID(false); setPage(id); };
 
-  if (!loggedIn) return <LoginPage onLogin={handleLogin} />;
-
-  // ── SUPER ADMIN: render FULLSCREEN, no header/sidebar ──
   if (page === "superadmin") {
     return (
       <>
