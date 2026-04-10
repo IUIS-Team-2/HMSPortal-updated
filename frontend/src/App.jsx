@@ -200,28 +200,30 @@ const handleLogin = (user, loc) => {
   }
 };
 
-  useEffect(() => { setLoginCallback(handleLogin); });
+    useEffect(() => { setLoginCallback(handleLogin); });
 
-  const syncDb = (currentUhid, currentAdmNo, dataKey, dataValue) => {
-    setDb(prev => {
-      const nextDb = JSON.parse(JSON.stringify(prev));
-      const p = nextDb[locId].find(x => x.uhid === currentUhid);
-      if (p) {
-        const a = p.admissions.find(x => x.admNo === currentAdmNo);
-        if (a) a[dataKey] = dataValue;
-      }
-      return nextDb;
-    });
-  };
+    // useEffect(() => { setLoginCallback(handleLogin); });
 
-  const handleNewAdmission = (existing) => {
-    const { admissions, ...pd } = existing; 
-    setDischarge(prev => ({ ...prev, doa: new Date().toISOString().slice(0, 16) }));
-    setPatient(pd); 
-    setUhid(existing.uhid);
-    setIsReturning(true); 
-    setSubPage("form");
-  };
+    const syncDb = (currentUhid, currentAdmNo, dataKey, dataValue) => {
+      setDb(prev => {
+        const nextDb = JSON.parse(JSON.stringify(prev));
+        const p = nextDb[locId].find(x => x.uhid === currentUhid);
+        if (p) {
+          const a = p.admissions.find(x => x.admNo === currentAdmNo);
+          if (a) a[dataKey] = dataValue;
+        }
+        return nextDb;
+      });
+    };
+
+    const handleNewAdmission = (existing) => {
+      const { admissions, ...pd } = existing; 
+      setDischarge(prev => ({ ...prev, doa: new Date().toISOString().slice(0, 16) }));
+      setPatient(pd);   
+      setUhid(existing.uhid);
+      setIsReturning(true); 
+      setSubPage("form");
+    };
 
   const handleDischargeFromHistory = (patientObj, admObj) => {
     const { admissions, ...pd } = patientObj; 
@@ -434,6 +436,27 @@ const handleLogin = (user, loc) => {
     } catch (error) { toast.error("Failed to process approval."); }
   };
 
+  // const canNav = id => ({ patient: true, medical: patientDone, discharge: patientDone && medicalDone, services: patientDone && medicalDone && dischargeDone, summary: patientDone && medicalDone && dischargeDone && servicesDone }[id] || false);
+  // const isDone = id => ({ patient: patientDone, medical: medicalDone, discharge: dischargeDone, services: servicesDone }[id] || false);
+  // const navTo  = id => { if (!canNav(id)) return; setShowUHID(false); setPage(id); };
+
+  if (!loggedIn) {
+    return (
+      <AuthContext.Provider value={{
+        user: null,
+        logout: () => {},
+        login: (username, password) => {
+          const users = getAllUsers();
+          const found = users.find(u => u.id === username && u.password === password);
+          if (!found) return { success: false, error: 'Invalid credentials' };
+          handleLogin(found, found.branch || found.locations?.[0] || "laxmi");
+          return { success: true };
+        }
+      }}>
+        <LoginPage onLogin={handleLogin} />
+      </AuthContext.Provider>
+    );
+  }
   if (page === "superadmin") {
     return (
       <>
@@ -582,9 +605,17 @@ export function useAuth() {
   const logout = () => { sessionStorage.clear(); window.location.reload(); };
   const login = (username, password) => {
     const found = getAllUsers().find(u => u.id === username && u.password === password);
-    if (!found) return { success: false, error: 'Invalid credentials' };
-    if (_loginCallback) _loginCallback(found, found.branch || (found.locations && found.locations[0]) || "laxmi");
-    return { success: true };
-  };
-  return { user, logout, login };
+   if (!found) return { success: false, error: 'Invalid credentials' };
+
+if (_loginCallback) {
+  _loginCallback(
+    found,
+    found.branch || (found.locations && found.locations[0]) || "laxmi"
+  );
+}
+
+return { success: true };
+};
+
+return { user, logout, login };
 }

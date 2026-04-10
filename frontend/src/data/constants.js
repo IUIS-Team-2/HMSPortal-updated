@@ -150,7 +150,7 @@ export const USERS = [
     role: "admin",
     locations: ["laxmi"],
     branch: "laxmi",
-  },
+  },      
   {
     id: "admin_raya",
     name: "Admin Raya",
