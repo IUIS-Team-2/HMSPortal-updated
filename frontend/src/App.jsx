@@ -156,20 +156,29 @@ export default function App() {
     setCurrentUser(user);
     setLocId(loc || "laxmi");
     setLoggedIn(true);
+
+    // 1. Determine which page they should go to based on their role
+    let startingPage = "patient"; // Default to reception
+    if (user.role === "superadmin" || user.role === "admin") {
+      startingPage = "superadmin";
+    } else if (user.role === "managementadmin") {
+      startingPage = "managementadmin";
+    } else if (["opd", "ipd", "billing", "pharmacy", "doctor", "nursing", "lab", "radiology", "employee"].includes(user.role)) {
+      startingPage = "employee";
+    }
+
     try {
       sessionStorage.setItem('hms_loggedIn', 'true');
       sessionStorage.setItem('hms_currentUser', JSON.stringify(user));
-      sessionStorage.setItem('hms_page', user.role === 'superadmin' ? 'superadmin' : user.role === 'managementadmin' ? 'managementadmin' : 'employee');
+      sessionStorage.setItem('hms_page', startingPage);
     } catch {}
-    if (user.role === "superadmin") {
-      setPage("superadmin");
-    } else if (user.role === "managementadmin") {
-      setPage("managementadmin");
-    } else if (["opd","ipd","billing","pharmacy","doctor","nursing","lab","radiology","reception","employee"].includes(user.role)) {
-      setPage("employee");
-    } else {
+
+    // 2. Actually route them to the page
+    if (startingPage === "patient") {
       setPage("patient");
       setSubPage("search");
+    } else {
+      setPage(startingPage);
     }
   };
 
