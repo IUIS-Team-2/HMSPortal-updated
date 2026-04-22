@@ -24,9 +24,10 @@ import MedicalHistoryPage from "./pages/MedicalHistoryPage";
 import LoginPage from "./pages/LoginPage";
 import HodDashboard from "./pages/HodDashboard";
 import UploadingDashboard from "./pages/UploadingDashboard";
-import QueryDashboard from "./pages/QueryDashboard";         
-import OpdDashboard from "./pages/OpdDashboard";             
-import IntimationDashboard from "./pages/IntimationDashboard"; 
+import QueryDashboard from "./pages/QueryDashboard";
+import OpdDashboard from "./pages/OpdDashboard";
+import IntimationDashboard from "./pages/IntimationDashboard";
+import DoctorDashboard from "./pages/DoctorDashboard"; // 🩺 Doctor dept
 import { ThemeProvider } from "./context/ThemeContext";
 
 // Modals
@@ -193,16 +194,15 @@ export default function App() {
     } else if (user.role === "uploading") {
       startingPage = "uploading";
     } else if (user.role === "query") {
-      // 🌟 Query department staff
       startingPage = "query";
     } else if (user.role === "opd") {
-      // 🌟 OPD department staff — note: role "opd" goes to OPD dashboard,
-      //    NOT the branch staff layout (which uses role "ipd" etc.)
       startingPage = "opd";
     } else if (user.role === "intimation") {
-      // 🌟 Intimation department staff
       startingPage = "intimation";
-    } else if (["ipd", "billing", "pharmacy", "doctor", "nursing", "lab", "radiology", "employee"].includes(user.role)) {
+    } else if (user.role === "doctor") {
+      // 🩺 Doctor department — dedicated daily patient log with HOD/Admin submission
+      startingPage = "doctor";
+    } else if (["ipd", "billing", "pharmacy", "nursing", "lab", "radiology", "employee"].includes(user.role)) {
       startingPage = "employee";
     }
 
@@ -535,7 +535,7 @@ export default function App() {
     );
   }
 
-  // ─── 🌟 Query Dashboard ───────────────────────────────────────────────────────
+  // ─── Query Dashboard ──────────────────────────────────────────────────────────
   if (page === "query") {
     return (
       <ThemeProvider>
@@ -548,7 +548,7 @@ export default function App() {
     );
   }
 
-  // ─── 🌟 OPD Dashboard ─────────────────────────────────────────────────────────
+  // ─── OPD Dashboard ────────────────────────────────────────────────────────────
   if (page === "opd") {
     return (
       <ThemeProvider>
@@ -561,11 +561,24 @@ export default function App() {
     );
   }
 
-  // ─── 🌟 Intimation Dashboard ──────────────────────────────────────────────────
+  // ─── Intimation Dashboard ─────────────────────────────────────────────────────
   if (page === "intimation") {
     return (
       <ThemeProvider>
         <IntimationDashboard
+          currentUser={currentUser}
+          onLogout={handleLogout}
+        />
+        <ToastContainer position="bottom-right" />
+      </ThemeProvider>
+    );
+  }
+
+  // ─── 🩺 Doctor Dashboard ──────────────────────────────────────────────────────
+  if (page === "doctor") {
+    return (
+      <ThemeProvider>
+        <DoctorDashboard
           currentUser={currentUser}
           onLogout={handleLogout}
         />
