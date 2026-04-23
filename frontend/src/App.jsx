@@ -27,7 +27,8 @@ import UploadingDashboard from "./pages/UploadingDashboard";
 import QueryDashboard from "./pages/QueryDashboard";
 import OpdDashboard from "./pages/OpdDashboard";
 import IntimationDashboard from "./pages/IntimationDashboard";
-import DoctorDashboard from "./pages/DoctorDashboard"; // 🩺 Doctor dept
+import DoctorDashboard from "./pages/DoctorDashboard";       
+import NursingDashboard from "./pages/NursingDashboard";     
 import { ThemeProvider } from "./context/ThemeContext";
 
 // Modals
@@ -202,7 +203,10 @@ export default function App() {
     } else if (user.role === "doctor") {
       // 🩺 Doctor department — dedicated daily patient log with HOD/Admin submission
       startingPage = "doctor";
-    } else if (["ipd", "billing", "pharmacy", "nursing", "lab", "radiology", "employee"].includes(user.role)) {
+    } else if (user.role === "nursing") {
+      // 🩹 Nursing department — daily nursing log with HOD/Admin submission
+      startingPage = "nursing";
+    } else if (["ipd", "billing", "pharmacy", "lab", "radiology", "employee"].includes(user.role)) {
       startingPage = "employee";
     }
 
@@ -579,6 +583,19 @@ export default function App() {
     return (
       <ThemeProvider>
         <DoctorDashboard
+          currentUser={currentUser}
+          onLogout={handleLogout}
+        />
+        <ToastContainer position="bottom-right" />
+      </ThemeProvider>
+    );
+  }
+
+  // ─── 🩹 Nursing Dashboard ─────────────────────────────────────────────────────
+  if (page === "nursing") {
+    return (
+      <ThemeProvider>
+        <NursingDashboard
           currentUser={currentUser}
           onLogout={handleLogout}
         />
