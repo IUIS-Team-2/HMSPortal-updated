@@ -17,38 +17,25 @@ export default function LoginPage({ onLogin }) {
     e.preventDefault();
     setError('');
     setLoading(true);
-
     try {
-      // 1. Call the real Django backend
       const data = await apiService.login(username, password);
-
-      // 2. Save the secure JWT token so the interceptor can use it
       sessionStorage.setItem('hms_token', data.access);
-
-      // 3. Decode the JWT token 
       const payload = JSON.parse(atob(data.access.split('.')[1]));
-
-      // 🌟 THE FIX: Translate backend branch codes to frontend theme words
       let frontendBranch = payload.branch;
       if (frontendBranch === "LNM") frontendBranch = "laxmi";
       if (frontendBranch === "RYM") frontendBranch = "raya";
-
       const loggedInUser = {
         id: payload.username,
         username: payload.username,
         name: payload.name,
         role: payload.role,
-        branch: frontendBranch,       // Now safely "laxmi" or "raya"
-        locations: [frontendBranch]   // Now safely "laxmi" or "raya"
+        branch: frontendBranch,
+        locations: [frontendBranch]
       };
-
-      // 4. Send the user into the portal safely!
       onLogin(loggedInUser, frontendBranch || "laxmi");
-
     } catch (err) {
       setError(err.response?.data?.detail || "Invalid username or password");
     }
-
     setLoading(false);
   };
 
@@ -81,7 +68,6 @@ export default function LoginPage({ onLogin }) {
         position: 'relative', overflow: 'hidden',
       }}>
         <div style={{ position:'absolute', top:0, left:0, right:0, height:5, background:'linear-gradient(90deg,#1e40af,#3b82f6,#1e40af)' }} />
-
         <div style={{ textAlign:'center', marginBottom:32 }}>
           <div style={{
             display:'inline-flex', alignItems:'center', justifyContent:'center',
@@ -108,15 +94,9 @@ export default function LoginPage({ onLogin }) {
               <form onSubmit={handleForgot}>
                 <div style={{ marginBottom:14 }}>
                   <label style={{ display:'block', fontSize:12, fontWeight:600, color:'#374151', marginBottom:5 }}>Email Address</label>
-                  <input
-                    type="email"
-                    value={forgotEmail}
-                    onChange={e => setForgotEmail(e.target.value)}
+                  <input type="email" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)}
                     placeholder="Enter your email"
-                    style={{
-                      width:'100%', padding:'10px 14px', border:'1.5px solid #e5e7eb',
-                      borderRadius:10, fontSize:14, boxSizing:'border-box', outline:'none',
-                    }}
+                    style={{ width:'100%', padding:'10px 14px', border:'1.5px solid #e5e7eb', borderRadius:10, fontSize:14, boxSizing:'border-box', outline:'none' }}
                     onFocus={e=>e.target.style.borderColor='#3b82f6'}
                     onBlur={e=>e.target.style.borderColor='#e5e7eb'}
                   />
@@ -126,10 +106,7 @@ export default function LoginPage({ onLogin }) {
                     {forgotError}
                   </div>
                 )}
-                <button type="submit" style={{
-                  width:'100%', padding:'12px', background:'#1e40af', color:'#fff',
-                  border:'none', borderRadius:10, fontSize:15, fontWeight:700, cursor:'pointer',
-                }}>
+                <button type="submit" style={{ width:'100%', padding:'12px', background:'#1e40af', color:'#fff', border:'none', borderRadius:10, fontSize:15, fontWeight:700, cursor:'pointer' }}>
                   Send Reset Link
                 </button>
               </form>
@@ -140,41 +117,25 @@ export default function LoginPage({ onLogin }) {
             <form onSubmit={handleSubmit}>
               <div style={{ marginBottom:14 }}>
                 <label style={{ display:'block', fontSize:12, fontWeight:600, color:'#374151', marginBottom:5 }}>Username</label>
-                <input
-                  value={username} onChange={e=>setUsername(e.target.value)}
+                <input value={username} onChange={e=>setUsername(e.target.value)}
                   placeholder="Enter your username" autoComplete="username"
-                  style={{
-                    width:'100%', padding:'10px 14px', border:'1.5px solid #e5e7eb',
-                    borderRadius:10, fontSize:14, boxSizing:'border-box', outline:'none',
-                  }}
+                  style={{ width:'100%', padding:'10px 14px', border:'1.5px solid #e5e7eb', borderRadius:10, fontSize:14, boxSizing:'border-box', outline:'none' }}
                   onFocus={e=>e.target.style.borderColor='#3b82f6'}
                   onBlur={e=>e.target.style.borderColor='#e5e7eb'}
                 />
               </div>
-
               <div style={{ marginBottom:8 }}>
                 <label style={{ display:'block', fontSize:12, fontWeight:600, color:'#374151', marginBottom:5 }}>Password</label>
                 <div style={{ position:'relative' }}>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
+                  <input type={showPassword ? 'text' : 'password'}
                     value={password} onChange={e=>setPassword(e.target.value)}
                     placeholder="Enter your password" autoComplete="current-password"
-                    style={{
-                      width:'100%', padding:'10px 40px 10px 14px', border:'1.5px solid #e5e7eb',
-                      borderRadius:10, fontSize:14, boxSizing:'border-box', outline:'none',
-                    }}
+                    style={{ width:'100%', padding:'10px 40px 10px 14px', border:'1.5px solid #e5e7eb', borderRadius:10, fontSize:14, boxSizing:'border-box', outline:'none' }}
                     onFocus={e=>e.target.style.borderColor='#3b82f6'}
                     onBlur={e=>e.target.style.borderColor='#e5e7eb'}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    style={{
-                      position:'absolute', right:12, top:'50%', transform:'translateY(-50%)',
-                      background:'none', border:'none', cursor:'pointer', padding:0,
-                      color:'#9ca3af', display:'flex', alignItems:'center',
-                    }}
-                  >
+                  <button type="button" onClick={() => setShowPassword(!showPassword)}
+                    style={{ position:'absolute', right:12, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', padding:0, color:'#9ca3af', display:'flex', alignItems:'center' }}>
                     {showPassword ? (
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/>
@@ -190,32 +151,23 @@ export default function LoginPage({ onLogin }) {
                   </button>
                 </div>
               </div>
-
-              {/* Forgot Password Link */}
               <div style={{ textAlign:'right', marginBottom:18 }}>
-                <span
-                  onClick={() => setShowForgot(true)}
-                  style={{ fontSize:12, color:'#1e40af', cursor:'pointer', fontWeight:600 }}
-                >
+                <span onClick={() => setShowForgot(true)} style={{ fontSize:12, color:'#1e40af', cursor:'pointer', fontWeight:600 }}>
                   Forgot Password?
                 </span>
               </div>
-
               {error && (
                 <div style={{ background:'#fef2f2', border:'1px solid #fca5a5', color:'#b91c1c', borderRadius:8, padding:'9px 14px', fontSize:13, marginBottom:14 }}>
                   {error}
                 </div>
               )}
-
-              <button
-                type="submit" disabled={loading || !username || !password}
+              <button type="submit" disabled={loading || !username || !password}
                 style={{
                   width:'100%', padding:'12px', background: loading ? '#93c5fd' : '#1e40af',
                   color:'#fff', border:'none', borderRadius:10, fontSize:15,
                   fontWeight:700, cursor: loading ? 'not-allowed' : 'pointer',
                   transition:'background 0.2s', letterSpacing:'0.02em',
-                }}
-              >
+                }}>
                 {loading ? 'Signing in…' : 'Sign In'}
               </button>
             </form>

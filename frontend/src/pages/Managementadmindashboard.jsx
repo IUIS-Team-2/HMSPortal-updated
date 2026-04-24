@@ -7,11 +7,19 @@ const LOCATION_DB = {
   raya: []
 };
 
+// ── OCEAN BLUE PALETTE ────────────────────────────────────────────────────────
+// Primary   #0ea5e9  sky-500
+// Mid       #38bdf8  sky-400
+// Deep      #0284c7  sky-600
+// Darkest   #0c4a6e  sky-900
+// Page bg   #f0f9ff  sky-50
+// Border lt #e0f2fe  sky-100
+// Border md #bae6fd  sky-200
+// ─────────────────────────────────────────────────────────────────────────────
 
-// ── CONSTANTS ─────────────────────────────────────────────────────────────────
 const BC = {
-  laxmi: { label: "Laxmi Nagar", accent: "#34d399", dim: "#34d39918", border: "#34d39930" },
-  raya:  { label: "Raya",        accent: "#818cf8", dim: "#818cf818", border: "#818cf830" },
+  laxmi: { label: "Laxmi Nagar", accent: "#0ea5e9", dim: "#0ea5e918", border: "#0ea5e930" },
+  raya:  { label: "Raya",        accent: "#38bdf8", dim: "#38bdf818", border: "#38bdf830" },
 };
 const BRANCH_KEYS = ["laxmi", "raya"];
 const DEPT_OPTIONS = ["HOD", "Billing", "Uploading", "Intimation", "Query", "OPD"];
@@ -35,16 +43,16 @@ const NAV = [
 ];
 
 const SUMMARY_META = {
-  Normal: { color: "#34d399", bg: "#34d39916" },
-  LAMA:   { color: "#f59e0b", bg: "#f59e0b16" },
-  Refer:  { color: "#34d399", bg: "#22d3ee16" },
-  Death:  { color: "#f87171", bg: "#f8717116" },
-  DAMA:   { color: "#c084fc", bg: "#c084fc16" },
+  Normal: { color: "#0ea5e9", bg: "#0ea5e916" },   // ocean blue
+  LAMA:   { color: "#f59e0b", bg: "#f59e0b16" },   // amber
+  Refer:  { color: "#38bdf8", bg: "#38bdf816" },   // sky mid
+  Death:  { color: "#f87171", bg: "#f8717116" },   // red
+  DAMA:   { color: "#c084fc", bg: "#c084fc16" },   // purple
 };
 const TASK_STATUS_META = {
   "Pending":     { color: "#f59e0b", bg: "#f59e0b18" },
-  "In Progress": { color: "#38bdf8", bg: "#38bdf818" },
-  "Completed":   { color: "#34d399", bg: "#34d39918" },
+  "In Progress": { color: "#0ea5e9", bg: "#0ea5e918" },  // ocean blue
+  "Completed":   { color: "#38bdf8", bg: "#38bdf818" },  // sky mid
   "On Hold":     { color: "#f87171", bg: "#f8717118" },
 };
 const TASK_PRIORITY_META = {
@@ -54,7 +62,7 @@ const TASK_PRIORITY_META = {
   "Urgent": { color: "#c084fc", bg: "#c084fc18" },
 };
 const DEPT_ICONS = { HOD:"👔", Billing:"💳", Uploading:"☁️", Intimation:"📢", Query:"❓", OPD:"🏥" };
-const DEPT_ACCENT_CYCLE = ["#34d399","#818cf8","#f59e0b","#38bdf8","#f87171","#c084fc","#22d3ee"];
+const DEPT_ACCENT_CYCLE = ["#0ea5e9","#38bdf8","#f59e0b","#0284c7","#f87171","#c084fc","#7dd3fc"];
 
 // ── UTILS ─────────────────────────────────────────────────────────────────────
 const fmt    = (n)   => "₹" + Number(n).toLocaleString("en-IN");
@@ -131,115 +139,178 @@ function seedPatients(dbBranch, branchKey) {
   }));
 }
 
-// ── DYNAMIC CSS (theme-dependent only) ────────────────────────────────────────
+// ── DYNAMIC CSS (ocean blue theme) ────────────────────────────────────────────
 const DYNAMIC_CSS = (accent, isDark) => `
-  option { background: ${isDark ? "#040710" : "#ffffff"}; }
+  option { background: ${isDark ? "#040d1a" : "#ffffff"}; }
 
   /* ── THEME: GLOBAL ── */
-  body { background: ${isDark ? "#05080f" : "#f0f4ff"}; color: ${isDark ? "#e2e8f0" : "#1e293b"}; }
-
-  ::-webkit-scrollbar-thumb { background: ${isDark ? "#1a2540" : "#c7d5eb"}; }
+  body { background: ${isDark ? "#05101f" : "#f0f9ff"}; color: ${isDark ? "#e2e8f0" : "#1e293b"}; }
+  ::-webkit-scrollbar-thumb { background: ${isDark ? "#0e2a45" : "#bae6fd"}; }
 
   /* ── HEADER ── */
-  .hms-hdr        { background: ${isDark ? "#05080f" : "#f0f4ff"}; }
-  .hms-logo-text  { color: ${isDark ? "#f1f5f9" : "#0f172a"}; }
-  .hms-logo-sub   { color: ${isDark ? "#2d3a50" : "#94a3b8"}; }
+  .hms-hdr        { background: ${isDark ? "#05101f" : "#f0f9ff"}; border-bottom: 1px solid ${isDark ? "#0e2a45" : "#bae6fd"}; }
+  .hms-logo-text  { color: ${isDark ? "#f1f5f9" : "#0c4a6e"}; }
+  .hms-logo-sub   { color: ${isDark ? "#1e4060" : "#64748b"}; }
   .hms-role-badge { background: ${accent}18; border: 1px solid ${accent}30; color: ${accent}; }
-  .hms-avatar     { background: linear-gradient(135deg, ${accent}, #818cf8); }
-  .hms-big-avatar { background: linear-gradient(135deg, ${accent}, #818cf8); }
+  .hms-avatar     { background: linear-gradient(135deg, ${accent}, #0284c7); }
+  .hms-big-avatar { background: linear-gradient(135deg, ${accent}, #0284c7); }
   .hms-avatar-pill {
-    background: ${isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.05)"};
-    border: 1px solid ${isDark ? "#1e2a3a" : "#dde8f5"};
+    background: ${isDark ? "rgba(14,165,233,.06)" : "rgba(14,165,233,.06)"};
+    border: 1px solid ${isDark ? "#0e2a45" : "#bae6fd"};
   }
-  .hms-avatar-name { color: ${isDark ? "#94a3b8" : "#475569"}; }
-  .hms-logout-btn {
-    border: 1px solid ${isDark ? "#1e2a3a" : "#dde8f5"};
-    color: ${isDark ? "#64748b" : "#64748b"};
-  }
-  .hms-theme-btn {
-    border: 1px solid ${isDark ? "#1e2a3a" : "#dde8f5"};
-    color: ${isDark ? "#64748b" : "#64748b"};
-  }
+  .hms-avatar-name { color: ${isDark ? "#7dd3fc" : "#0284c7"}; }
+  .hms-logout-btn  { border: 1px solid ${isDark ? "#0e2a45" : "#bae6fd"}; color: ${isDark ? "#38bdf8" : "#0284c7"}; }
+  .hms-theme-btn   { border: 1px solid ${isDark ? "#0e2a45" : "#bae6fd"}; color: ${isDark ? "#38bdf8" : "#0284c7"}; }
 
   /* ── LAYOUT ── */
-  .hms-wrap { background: ${isDark ? "#05080f" : "#f0f4ff"}; color: ${isDark ? "#e2e8f0" : "#1e293b"}; }
+  .hms-wrap { background: ${isDark ? "#05101f" : "#f0f9ff"}; color: ${isDark ? "#e2e8f0" : "#1e293b"}; }
 
   /* ── SIDEBAR ── */
-  .hms-sb { background: ${isDark ? "#080c18" : "#ffffff"}; }
-  .hms-nav-section { color: ${isDark ? "#2d3a50" : "#94a3b8"}; }
-  .hms-nav-item { color: ${isDark ? "#64748b" : "#64748b"}; }
-  .hms-nav-item:hover { color: ${isDark ? "#f1f5f9" : "#0f172a"}; background: ${isDark ? "rgba(0,0,0,.05)" : "rgba(0,0,0,.05)"}; }
+  .hms-sb { background: ${isDark ? "#071626" : "#ffffff"}; border-right: 1px solid ${isDark ? "#0e2a45" : "#e0f2fe"}; }
+  .hms-nav-section { color: ${isDark ? "#1e4060" : "#64748b"}; }
+  .hms-nav-item { color: ${isDark ? "#38bdf8" : "#0284c7"}; }
+  .hms-nav-item:hover { color: ${isDark ? "#f1f5f9" : "#0c4a6e"}; background: ${isDark ? "#0e2a4520" : "#e0f2fe"}; }
   .hms-nav-item.active {
-    color: ${isDark ? "#f1f5f9" : "#0f172a"};
-    background: ${isDark ? "rgba(0,0,0,.05)" : "rgba(0,0,0,.05)"};
+    color: ${isDark ? "#f1f5f9" : "#0c4a6e"};
+    background: ${isDark ? "#0e2a4520" : "#e0f2fe"};
     border-left: 2px solid ${accent};
     font-weight: 600;
   }
-  .hms-signed-in   { color: ${isDark ? "#2d3a50" : "#94a3b8"}; }
-  .hms-signed-name { color: ${isDark ? "#94a3b8" : "#475569"}; }
-  .hms-signed-role { color: ${isDark ? "#64748b" : "#64748b"}; }
+  .hms-signed-in   { color: ${isDark ? "#1e4060" : "#64748b"}; }
+  .hms-signed-name { color: ${isDark ? "#7dd3fc" : "#0284c7"}; }
+  .hms-signed-role { color: ${isDark ? "#38bdf8" : "#0ea5e9"}; }
 
   /* ── BRANCH SELECT ── */
-  .hms-branch-label  { color: ${isDark ? "#2d3a50" : "#94a3b8"}; }
+  .hms-branch-label  { color: ${isDark ? "#1e4060" : "#64748b"}; }
   .hms-branch-select {
-    border: 1px solid ${isDark ? "#1a2540" : "#c7d5eb"};
-    background-color: ${isDark ? "#0b1120" : "#ffffff"};
+    border: 1px solid ${isDark ? "#0e2a45" : "#bae6fd"};
+    background-color: ${isDark ? "#081828" : "#ffffff"};
     color: ${isDark ? "#e2e8f0" : "#1e293b"};
   }
 
   /* ── PAGE HEADERS ── */
-  .hms-pg-label { color: ${isDark ? "#2d3a50" : "#94a3b8"}; }
-  .hms-pg-sub   { color: ${isDark ? "#64748b" : "#64748b"}; }
+  .hms-pg-label { color: ${isDark ? "#1e4060" : "#64748b"}; }
+  .hms-pg-sub   { color: ${isDark ? "#38bdf8" : "#0284c7"}; }
 
   /* ── CARDS ── */
-  .hms-card       { background: ${isDark ? "#0b1120" : "#ffffff"}; }
-  .hms-card-title { color: ${isDark ? "#e2e8f0" : "#1e293b"}; }
-  .hms-prof-card  { background: ${isDark ? "#080c18" : "#ffffff"}; }
+  .hms-card       { background: ${isDark ? "#081828" : "#ffffff"}; border: 1px solid ${isDark ? "#0e2a45" : "#e0f2fe"}; }
+  .hms-card-title { color: ${isDark ? "#e2e8f0" : "#0c4a6e"}; }
+  .hms-prof-card  { background: ${isDark ? "#071626" : "#ffffff"}; border: 1px solid ${isDark ? "#0e2a45" : "#bae6fd"}; }
 
   /* ── STAT ── */
-  .hms-stat-card  { background: ${isDark ? "#0b1120" : "#ffffff"}; }
-  .hms-stat-label { color: ${isDark ? "#64748b" : "#64748b"}; }
+  .hms-stat-card  { background: ${isDark ? "#081828" : "#ffffff"}; border: 1px solid ${isDark ? "#0e2a45" : "#e0f2fe"}; }
+  .hms-stat-label { color: ${isDark ? "#38bdf8" : "#0284c7"}; }
 
   /* ── TABLE ── */
-  .hms-th     { color: ${isDark ? "#2d3a50" : "#94a3b8"}; }
-  .hms-td     { color: ${isDark ? "#94a3b8" : "#475569"}; }
-  .hms-td-hi  { color: ${isDark ? "#f1f5f9" : "#0f172a"}; }
-  .hms-td-mono { color: ${isDark ? "#2d3a50" : "#94a3b8"}; }
-  .hms-td-sm  { color: ${isDark ? "#64748b" : "#64748b"}; }
+  .hms-tbl { border-collapse: collapse; width: 100%; font-size: 12px; }
+  .hms-tbl tr { border-bottom: 1px solid ${isDark ? "#0e2a45" : "#e0f2fe"}; }
+  .hms-tbl tr:hover td { background: ${isDark ? "#0e2a4525" : "#f0f9ff"} !important; }
+  .hms-th     { color: ${isDark ? "#1e4060" : "#0284c7"}; padding: 10px 12px; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; white-space: nowrap; }
+  .hms-td     { color: ${isDark ? "#7dd3fc" : "#334155"}; padding: 9px 12px; vertical-align: middle; }
+  .hms-td-hi  { color: ${isDark ? "#f1f5f9" : "#0c4a6e"}; font-weight: 600; }
+  .hms-td-mono { color: ${isDark ? "#1e4060" : "#64748b"}; font-family: monospace; font-size: 11px; }
+  .hms-td-sm  { color: ${isDark ? "#38bdf8" : "#0284c7"}; font-size: 11px; }
 
   /* ── BUTTONS ── */
-  .hms-add-btn     { background: linear-gradient(135deg, ${accent}, ${accent}cc); }
-  .hms-add-btn-lg  { background: linear-gradient(135deg, ${accent}, ${accent}cc); }
-  .hms-cancel-btn  { color: ${isDark ? "#64748b" : "#64748b"}; }
-  .hms-save-btn    { background: linear-gradient(135deg, ${accent}, ${accent}cc); }
-  .hms-export-main-btn { background: linear-gradient(135deg, ${accent}, ${accent}cc); }
+  .hms-add-btn     { background: linear-gradient(135deg, ${accent}, #0284c7); color:#fff; border:none; padding:6px 14px; border-radius:7px; font-size:11px; font-weight:700; cursor:pointer; }
+  .hms-add-btn-lg  { background: linear-gradient(135deg, ${accent}, #0284c7); color:#fff; border:none; padding:8px 18px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; }
+  .hms-cancel-btn  { background:transparent; border:1px solid ${isDark?"#0e2a45":"#bae6fd"}; color:${isDark?"#38bdf8":"#0284c7"}; padding:8px 16px; border-radius:7px; font-size:11px; cursor:pointer; }
+  .hms-save-btn    { background: linear-gradient(135deg, ${accent}, #0284c7); color:#fff; border:none; padding:8px 20px; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer; box-shadow: 0 4px 14px ${accent}40; }
+  .hms-danger-btn  { background: linear-gradient(135deg,#f87171,#ef4444); color:#fff; border:none; padding:8px 20px; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer; }
+  .hms-export-main-btn { background: linear-gradient(135deg, ${accent}, #0284c7); color:#fff; border:none; padding:12px 24px; border-radius:9px; font-size:13px; font-weight:700; cursor:pointer; width:100%; box-shadow: 0 4px 16px ${accent}40; }
+  .hms-action-btn  { background:transparent; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer; padding:4px 10px; border: 1px solid; transition: all .15s; }
+  .hms-action-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .hms-task-status-sel { font-size:10px; font-weight:700; border-radius:20px; padding:3px 10px; cursor:pointer; border-width:1.5px; border-style:solid; }
 
   /* ── FORMS ── */
-  .hms-lbl      { color: ${isDark ? "#64748b" : "#64748b"}; }
-  .hms-inp      { background: ${isDark ? "#080c18" : "#ffffff"}; color: ${isDark ? "#e2e8f0" : "#1e293b"}; }
-  .hms-inp-sm   { background: ${isDark ? "#080c18" : "#ffffff"}; color: ${isDark ? "#e2e8f0" : "#1e293b"}; }
-  .hms-sel      { background: ${isDark ? "#080c18" : "#ffffff"}; color: ${isDark ? "#e2e8f0" : "#1e293b"}; }
-  .hms-textarea { background: ${isDark ? "#080c18" : "#ffffff"}; color: ${isDark ? "#e2e8f0" : "#1e293b"}; }
-  .hms-pass-toggle { color: ${isDark ? "#64748b" : "#64748b"}; }
+  .hms-lbl      { font-size:10px; color:${isDark?"#38bdf8":"#0284c7"}; font-weight:600; text-transform:uppercase; letter-spacing:.08em; display:block; margin-bottom:4px; margin-top:10px; }
+  .hms-inp      { background: ${isDark ? "#040d1a" : "#f0f9ff"}; color: ${isDark ? "#e2e8f0" : "#1e293b"}; border: 1px solid ${isDark?"#0e2a45":"#bae6fd"}; border-radius:7px; padding:8px 11px; font-size:11px; width:100%; box-sizing:border-box; margin-bottom:0; outline:none; transition: border .15s; }
+  .hms-inp:focus { border-color: ${accent}; }
+  .hms-inp-sm   { background: ${isDark ? "#040d1a" : "#f0f9ff"}; color: ${isDark ? "#e2e8f0" : "#1e293b"}; border: 1px solid ${isDark?"#0e2a45":"#bae6fd"}; border-radius:6px; padding:6px 9px; font-size:11px; width:100%; box-sizing:border-box; outline:none; }
+  .hms-inp-sm:focus { border-color: ${accent}; }
+  .hms-sel      { background: ${isDark ? "#040d1a" : "#f0f9ff"}; color: ${isDark ? "#e2e8f0" : "#1e293b"}; border: 1px solid ${isDark?"#0e2a45":"#bae6fd"}; border-radius:7px; padding:8px 11px; font-size:11px; width:100%; box-sizing:border-box; outline:none; cursor:pointer; }
+  .hms-sel:focus { border-color: ${accent}; }
+  .hms-textarea { background: ${isDark ? "#040d1a" : "#f0f9ff"}; color: ${isDark ? "#e2e8f0" : "#1e293b"}; border: 1px solid ${isDark?"#0e2a45":"#bae6fd"}; border-radius:7px; padding:8px 11px; font-size:11px; width:100%; box-sizing:border-box; resize:vertical; min-height:70px; outline:none; }
+  .hms-textarea:focus { border-color: ${accent}; }
+  .hms-pass-wrap   { position:relative; }
+  .hms-pass-toggle { position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; font-size:9px; font-weight:700; letter-spacing:.06em; cursor:pointer; color:${isDark?"#38bdf8":"#0284c7"}; }
 
   /* ── MODAL ── */
-  .hms-modal-overlay { background: ${isDark ? "rgba(0,0,0,.7)" : "rgba(5,15,40,.6)"}; }
-  .hms-modal-box     { background: ${isDark ? "#0b1120" : "#ffffff"}; }
-  .hms-modal-title   { color: ${isDark ? "#f1f5f9" : "#0f172a"}; }
+  .hms-modal-overlay { position:fixed; inset:0; z-index:1000; display:flex; align-items:center; justify-content:center; background: ${isDark ? "rgba(0,8,20,.75)" : "rgba(5,20,50,.55)"}; backdrop-filter:blur(2px); }
+  .hms-modal-box     { background: ${isDark ? "#081828" : "#ffffff"}; border-radius:14px; padding:24px; max-height:88vh; overflow-y:auto; border:1px solid ${isDark?"#0e2a45":"#bae6fd"}; box-shadow: 0 20px 60px ${accent}20; }
+  .hms-modal-title   { color: ${isDark ? "#f1f5f9" : "#0c4a6e"}; font-size:15px; font-weight:700; margin-bottom:14px; }
+  .hms-modal-foot    { display:flex; gap:8px; justify-content:flex-end; margin-top:18px; padding-top:14px; border-top:1px solid ${isDark?"#0e2a45":"#e0f2fe"}; }
 
   /* ── MISC ── */
-  .hms-empty       { color: ${isDark ? "#2d3a50" : "#94a3b8"}; }
-  .hms-view-key    { color: ${isDark ? "#64748b" : "#64748b"}; }
-  .hms-view-val    { color: ${isDark ? "#e2e8f0" : "#1e293b"}; }
-  .hms-section-label { color: ${isDark ? "#2d3a50" : "#94a3b8"}; }
-  .hms-dept-card   { background: ${isDark ? "#0b1120" : "#ffffff"}; }
-  .hms-progress-bar    { background: ${isDark ? "#1e2a3a" : "#dde8f5"}; }
-  .hms-progress-bar-sm { background: ${isDark ? "#1e2a3a" : "#dde8f5"}; }
+  .hms-empty       { color: ${isDark ? "#1e4060" : "#64748b"}; text-align:center; padding:2rem; font-size:12px; }
+  .hms-view-key    { color: ${isDark ? "#38bdf8" : "#0284c7"}; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; margin-bottom:2px; }
+  .hms-view-val    { color: ${isDark ? "#e2e8f0" : "#0c4a6e"}; font-size:12px; font-weight:600; }
+  .hms-view-row    { display:flex; flex-direction:column; margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid ${isDark?"#0e2a45":"#e0f2fe"}; }
+  .hms-section-label { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:${isDark?"#1e4060":"#64748b"}; margin-bottom:10px; margin-top:4px; }
+  .hms-dept-card   { background: ${isDark ? "#081828" : "#ffffff"}; border:1px solid ${isDark?"#0e2a45":"#e0f2fe"}; border-top-width:4px; border-radius:12px; padding:16px; transition: box-shadow .15s; }
+  .hms-dept-card:hover { box-shadow: 0 4px 20px ${accent}15; }
+  .hms-progress-bar    { background: ${isDark ? "#0e2a45" : "#e0f2fe"}; border-radius:4px; height:6px; overflow:hidden; flex:1; }
+  .hms-progress-bar-sm { background: ${isDark ? "#0e2a45" : "#e0f2fe"}; border-radius:4px; height:5px; overflow:hidden; width:70px; }
+  .hms-progress-fill   { height:100%; border-radius:4px; transition: width .4s; }
+  .hms-ro-banner { font-size:10px; color:${isDark?"#38bdf8":"#0284c7"}; background:${accent}10; border:1px solid ${accent}25; border-radius:8px; padding:7px 12px; margin-bottom:14px; }
+  .hms-err-text  { color:#f87171; font-size:10px; margin-top:6px; }
+  .hms-notif { position:fixed; top:70px; right:20px; z-index:2000; padding:10px 18px; border-radius:10px; font-size:12px; font-weight:700; border-width:1px; border-style:solid; box-shadow:0 8px 24px #00000030; }
+
+  /* ── EXPORT TYPE ROW ── */
+  .hms-export-type-row { display:flex; align-items:center; gap:10px; padding:10px 12px; margin-bottom:6px; border-radius:9px; border:1.5px solid ${isDark?"#0e2a45":"#e0f2fe"}; cursor:pointer; transition: all .15s; }
+  .hms-export-type-row:hover { border-color: ${accent}50; background: ${accent}10 !important; }
+
+  /* ── BADGES & PILLS ── */
+  .hms-badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:12px; font-size:9px; font-weight:700; letter-spacing:.04em; border-width:1px; border-style:solid; }
+  .hms-pill  { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:14px; font-size:10px; font-weight:600; border-width:1px; border-style:solid; }
+  .hms-pill-sm { display:inline-flex; align-items:center; padding:2px 7px; border-radius:10px; font-size:9px; font-weight:700; border-width:1px; border-style:solid; }
+  .hms-pill-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .hms-exp-dod-pill { background:${isDark?"#f59e0b15":"#fef9c3"}; color:#f59e0b; border:1px solid #f59e0b30; border-radius:8px; padding:2px 8px; font-size:10px; font-weight:600; }
+  .hms-branch-pill { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:14px; font-size:10px; font-weight:700; margin-top:4px; }
+  .hms-branch-dot-btn { background:none; border:none; cursor:pointer; width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:50%; }
+  .hms-branch-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+  /* ── LAYOUT UTILS ── */
+  .hms-g2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .hms-g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:8px; }
+  .hms-g4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  .hms-stat-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; margin-bottom:16px; }
+  .hms-stat-card { border-radius:10px; padding:14px 16px; }
+  .hms-stat-num  { font-size:22px; font-weight:800; line-height:1; margin-bottom:4px; font-family:monospace; }
+  .hms-stat-icon { font-size:20px; margin-bottom:8px; }
+  .hms-card { border-radius:12px; padding:16px 18px; margin-bottom:16px; }
+  .hms-card-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .hms-prof-card { border-radius:14px; padding:20px; margin-bottom:16px; }
+  .hms-tr-alt:nth-child(even) td { background: ${isDark?"#071626":"#f8fbff"} !important; }
+
+  /* ── HEADER LAYOUT ── */
+  .hms-hdr { position:sticky; top:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:0 20px; height:54px; }
+  .hms-logo-row { display:flex; align-items:center; gap:10px; }
+  .hms-logo-text { font-size:15px; font-weight:800; letter-spacing:-.3px; }
+  .hms-logo-sub  { font-size:9px; letter-spacing:.1em; text-transform:uppercase; margin-top:1px; }
+  .hms-hdr-right { display:flex; align-items:center; gap:8px; }
+  .hms-avatar    { width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff; }
+  .hms-big-avatar { width:54px; height:54px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; color:#fff; flex-shrink:0; }
+  .hms-avatar-pill { display:flex; align-items:center; gap:7px; padding:4px 10px; border-radius:20px; }
+  .hms-avatar-name { font-size:11px; font-weight:600; }
+  .hms-logout-btn { background:transparent; border-radius:7px; padding:5px 12px; font-size:11px; font-weight:600; cursor:pointer; transition: all .15s; }
+  .hms-theme-btn  { background:transparent; border-radius:7px; padding:5px 10px; font-size:13px; cursor:pointer; transition: all .15s; }
+
+  /* ── BODY / SIDEBAR ── */
+  .hms-body { display:flex; flex:1; overflow:hidden; }
+  .hms-sb   { flex-shrink:0; display:flex; flex-direction:column; transition:width .2s; overflow:hidden; }
+  .hms-sb-top { flex-shrink:0; padding:14px 12px; }
+  .hms-nav-wrap { flex:1; overflow-y:auto; padding:8px 0; }
+  .hms-nav-item { display:flex; align-items:center; gap:10px; cursor:pointer; font-size:12px; font-weight:500; transition:all .15s; white-space:nowrap; padding:10px 14px; border-left:2px solid transparent; }
+  .hms-nav-icon { font-size:15px; flex-shrink:0; }
+  .hms-sb-bot { flex-shrink:0; padding:10px 12px; }
+  .hms-col-btn { background:transparent; border:none; cursor:pointer; font-size:11px; color:#38bdf8; padding:4px; }
+  .hms-main { flex:1; overflow-y:auto; padding:20px 24px; }
 
   /* ── PATIENT SELECT IN TASK MODAL ── */
   .hms-patient-select-box {
-    background: ${isDark ? "#080c18" : "#f8faff"};
-    border: 1px solid ${isDark ? "#1a2540" : "#c7d5eb"};
+    background: ${isDark ? "#040d1a" : "#f8faff"};
+    border: 1px solid ${isDark ? "#0e2a45" : "#bae6fd"};
     border-radius: 8px;
     max-height: 150px;
     overflow-y: auto;
@@ -252,47 +323,24 @@ const DYNAMIC_CSS = (accent, isDark) => `
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid ${isDark ? "#1a2540" : "#e8eef8"};
+    border-bottom: 1px solid ${isDark ? "#0e2a45" : "#e0f2fe"};
     transition: background 0.15s;
   }
   .hms-patient-select-item:last-child { border-bottom: none; }
   .hms-patient-select-item:hover { background: ${accent}18; }
   .hms-patient-select-item.selected { background: ${accent}22; border-left: 3px solid ${accent}; }
   .hms-patient-selected-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: ${accent}18;
-    border: 1px solid ${accent}40;
-    color: ${accent};
-    border-radius: 20px;
-    padding: 4px 10px;
-    font-size: 11px;
-    font-weight: 600;
-    margin-top: 6px;
+    display: inline-flex; align-items: center; gap: 6px;
+    background: ${accent}18; border: 1px solid ${accent}40; color: ${accent};
+    border-radius: 20px; padding: 4px 10px; font-size: 11px; font-weight: 600; margin-top: 6px;
   }
-  .hms-patient-clear-btn {
-    background: none;
-    border: none;
-    color: ${accent};
-    cursor: pointer;
-    font-size: 13px;
-    line-height: 1;
-    padding: 0;
-    opacity: 0.7;
-  }
-  .hms-patient-clear-btn:hover { opacity: 1; }
+  .hms-patient-clear-btn { background:none; border:none; color:${accent}; cursor:pointer; font-size:13px; line-height:1; padding:0; opacity:.7; }
+  .hms-patient-clear-btn:hover { opacity:1; }
   .hms-patient-search {
-    background: ${isDark ? "#080c18" : "#ffffff"};
+    background: ${isDark ? "#040d1a" : "#ffffff"};
     color: ${isDark ? "#e2e8f0" : "#1e293b"};
-    border: 1px solid ${isDark ? "#1a2540" : "#c7d5eb"};
-    border-radius: 6px;
-    padding: 6px 10px;
-    font-size: 11px;
-    width: 100%;
-    box-sizing: border-box;
-    margin-bottom: 4px;
-    outline: none;
+    border: 1px solid ${isDark ? "#0e2a45" : "#bae6fd"};
+    border-radius: 6px; padding: 6px 10px; font-size: 11px; width: 100%; box-sizing: border-box; margin-bottom: 4px; outline: none;
   }
   .hms-patient-search:focus { border-color: ${accent}; }
 `;
@@ -314,12 +362,10 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
     raya:  seedPatients(LOCATION_DB["raya"],  "raya"),
   }));
 
-  // Departments
   const [departments,    setDepartments]    = useState(() => safeLoad("hms_mgmt_departments", []));
   const [showDeptModal,  setShowDeptModal]  = useState(false);
   const [deptForm,       setDeptForm]       = useState({ name:"", description:"", head:"" });
 
-  // Employees
   const [employees,      setEmployees]      = useState(() => safeLoad("hms_mgmt_employees", []));
   const [showEmpModal,   setShowEmpModal]   = useState(false);
   const [empForm,        setEmpForm]        = useState({ fullName:"", username:"", empId:"", dept:"HOD", email:"", phone:"", role:"", password:"", confirmPassword:"" });
@@ -327,7 +373,6 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
   const [empShowConfirm, setEmpShowConfirm] = useState(false);
   const [empPassErr,     setEmpPassErr]     = useState("");
 
-  // Tasks
   const [tasks,           setTasks]           = useState(() => safeLoad("hms_mgmt_tasks", []));
   const [showTaskModal,   setShowTaskModal]   = useState(false);
   const [editTask,        setEditTask]        = useState(null);
@@ -335,7 +380,6 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
   const [taskPatientSearch, setTaskPatientSearch] = useState("");
   const [taskReportFilter,setTaskReportFilter]= useState({ period:"all", dept:"All", status:"All", empName:"" });
 
-  // Patient modals
   const [showMedModal,      setShowMedModal]      = useState(false);
   const [showSummaryModal,  setShowSummaryModal]  = useState(false);
   const [showReportModal,   setShowReportModal]   = useState(false);
@@ -366,11 +410,8 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
   const allPatientsFlat   = useMemo(() => BRANCH_KEYS.flatMap(bk => (allPatients[bk]||[]).map(p=>({...p,_branch:bk,_branchLabel:BC[bk].label}))), [allPatients]);
   const allDeptOptions    = [...DEPT_OPTIONS, ...departments.filter(d=>!DEPT_OPTIONS.includes(d.name)).map(d=>d.name)];
 
-  // All patients across both branches for task assignment
   const allPatientsForTask = useMemo(() => allPatientsFlat.map(p => ({
-    uhid: p.uhid,
-    name: p.patientName || p.name,
-    branch: p._branchLabel,
+    uhid: p.uhid, name: p.patientName || p.name, branch: p._branchLabel,
     status: (p.admissions?.[p.admissions.length-1]?.discharge?.dod) ? "Discharged" : "Admitted",
   })), [allPatientsFlat]);
 
@@ -402,18 +443,8 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
   const saveReports  = () => { updatePatient(viewBranch, editRepPt.uhid, p=>({...p,reports:editRepPt.reports})); toast("Reports saved"); setShowReportModal(false); setEditRepPt(null); };
 
   // ── TASK HELPERS ──────────────────────────────────────────────────────────
-  const openNewTask  = () => {
-    setEditTask(null);
-    setTaskForm({title:"",description:"",assignedTo:"",department:"HOD",priority:"Medium",status:"Pending",dueDate:"",patientUhid:"",patientName:""});
-    setTaskPatientSearch("");
-    setShowTaskModal(true);
-  };
-  const openEditTask = (t) => {
-    setEditTask(t);
-    setTaskForm({title:t.title,description:t.description||"",assignedTo:t.assignedTo,department:t.department,priority:t.priority,status:t.status,dueDate:t.dueDate||"",patientUhid:t.patientUhid||"",patientName:t.patientName||""});
-    setTaskPatientSearch("");
-    setShowTaskModal(true);
-  };
+  const openNewTask  = () => { setEditTask(null); setTaskForm({title:"",description:"",assignedTo:"",department:"HOD",priority:"Medium",status:"Pending",dueDate:"",patientUhid:"",patientName:""}); setTaskPatientSearch(""); setShowTaskModal(true); };
+  const openEditTask = (t) => { setEditTask(t); setTaskForm({title:t.title,description:t.description||"",assignedTo:t.assignedTo,department:t.department,priority:t.priority,status:t.status,dueDate:t.dueDate||"",patientUhid:t.patientUhid||"",patientName:t.patientName||""}); setTaskPatientSearch(""); setShowTaskModal(true); };
   const saveTask = () => {
     if (!taskForm.title || !taskForm.assignedTo) { toast("Title and Assigned To are required","err"); return; }
     if (editTask) {
@@ -425,7 +456,7 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
     }
     setShowTaskModal(false); setEditTask(null);
   };
-  const deleteTask       = (id)     => { setTasks(prev=>prev.filter(t=>t.id!==id)); toast("Task deleted"); };
+  const deleteTask       = (id)        => { setTasks(prev=>prev.filter(t=>t.id!==id)); toast("Task deleted"); };
   const updateTaskStatus = (id,status) => { setTasks(prev=>prev.map(t=>t.id===id?{...t,status,updatedAt:new Date().toISOString(),completedAt:status==="Completed"?new Date().toISOString():t.completedAt}:t)); toast(`Task marked ${status}`); };
 
   const filteredTaskReport = useMemo(() => {
@@ -471,63 +502,34 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
   };
 
   // ── SMALL RENDER HELPERS ──────────────────────────────────────────────────
-  const Badge = ({ col, children }) => (
-    <span className="hms-badge" style={{ background:`${col}20`, color:col, borderColor:`${col}40` }}>{children}</span>
-  );
-  const Pill = ({ col, bg, children, small }) => (
-    <span className={small?"hms-pill-sm":"hms-pill"} style={{ background:bg||`${col}20`, color:col, borderColor:`${col}40` }}>{children}</span>
-  );
+  const Badge = ({ col, children }) => <span className="hms-badge" style={{ background:`${col}20`, color:col, borderColor:`${col}40` }}>{children}</span>;
+  const Pill  = ({ col, bg, children, small }) => <span className={small?"hms-pill-sm":"hms-pill"} style={{ background:bg||`${col}20`, color:col, borderColor:`${col}40` }}>{children}</span>;
   const SummaryPill = ({ type }) => { const m=SUMMARY_META[type]||{color:"#6b7280",bg:"#6b728018"}; return <Pill col={m.color} bg={m.bg}><span className="hms-pill-dot" style={{ background:m.color }}/>{type||"Normal"}</Pill>; };
-  const StatusPill  = ({ s }) => { const m=TASK_STATUS_META[s]||{color:"#6b7280",bg:"#6b728018"}; return <Pill col={m.color} bg={m.bg}>{s}</Pill>; };
-  const PriorityPill= ({ p }) => { const m=TASK_PRIORITY_META[p]||{color:"#6b7280",bg:"#6b728018"}; return <Pill small col={m.color} bg={m.bg}>{p}</Pill>; };
+  const StatusPill  = ({ s })    => { const m=TASK_STATUS_META[s]||{color:"#6b7280",bg:"#6b728018"}; return <Pill col={m.color} bg={m.bg}>{s}</Pill>; };
+  const PriorityPill= ({ p })    => { const m=TASK_PRIORITY_META[p]||{color:"#6b7280",bg:"#6b728018"}; return <Pill small col={m.color} bg={m.bg}>{p}</Pill>; };
   const ActionBtn   = ({ col, onClick, children }) => <button className="hms-action-btn" style={{ borderColor:`${col}40`, color:col }} onClick={onClick}>{children}</button>;
   const Th = ({ children }) => <th className="hms-th">{children}</th>;
   const Td = ({ children, hi, mono, sm, style:s }) => <td className={`hms-td${hi?" hms-td-hi":""}${mono?" hms-td-mono":""}${sm?" hms-td-sm":""}`} style={s}>{children}</td>;
-
-  const ProgressBar = ({ pct, col }) => (
-    <div className="hms-progress-bar">
-      <div className="hms-progress-fill" style={{ width:`${pct}%`, background:col }}/>
-    </div>
-  );
+  const ProgressBar = ({ pct, col }) => <div className="hms-progress-bar"><div className="hms-progress-fill" style={{ width:`${pct}%`, background:col }}/></div>;
 
   const BranchHeader = ({ title }) => (
     <div style={{ marginBottom:18 }}>
       <div className="hms-pg-label">{title}</div>
       <span className="hms-branch-pill" style={{ background:bc.dim, border:`1px solid ${bc.border}`, color:accent }}>
-        <span className="hms-branch-dot" style={{ width:7,height:7,borderRadius:"50%",background:accent,display:"inline-block" }}/> {bc.label}
+        <span className="hms-branch-dot" style={{ background:accent }}/> {bc.label}
       </span>
     </div>
   );
-  const PageHeader = ({ title, subtitle }) => (
-    <div style={{ marginBottom:20 }}>
-      <div className="hms-pg-label">{title}</div>
-      {subtitle && <div className="hms-pg-sub">{subtitle}</div>}
-    </div>
-  );
-  const CardRow = ({ title, action }) => (
-    <div className="hms-card-row"><div className="hms-card-title">{title}</div>{action}</div>
-  );
-  const TableWrap = ({ heads, children }) => (
-    <div style={{ overflowX:"auto" }}>
-      <table className="hms-tbl">
-        <thead><tr>{heads.map(h=><Th key={h}>{h}</Th>)}</tr></thead>
-        <tbody>{children}</tbody>
-      </table>
-    </div>
-  );
-  const EmptyState = ({ icon, label, sub }) => (
-    <div style={{ textAlign:"center", padding:"3rem", color:"#64748b" }}>
-      {icon && <div style={{ fontSize:40, marginBottom:12 }}>{icon}</div>}
-      <div style={{ fontSize:14, fontWeight:600, color:"#94a3b8", marginBottom:6 }}>{label}</div>
-      {sub && <div style={{ fontSize:12 }}>{sub}</div>}
-    </div>
-  );
-  const StatCard = ({ col, icon, label, val, sub, topBorder }) => (
+  const PageHeader  = ({ title, subtitle }) => <div style={{ marginBottom:20 }}><div className="hms-pg-label">{title}</div>{subtitle&&<div className="hms-pg-sub">{subtitle}</div>}</div>;
+  const CardRow     = ({ title, action })   => <div className="hms-card-row"><div className="hms-card-title">{title}</div>{action}</div>;
+  const TableWrap   = ({ heads, children }) => <div style={{ overflowX:"auto" }}><table className="hms-tbl"><thead><tr>{heads.map(h=><Th key={h}>{h}</Th>)}</tr></thead><tbody>{children}</tbody></table></div>;
+  const EmptyState  = ({ icon, label, sub }) => <div style={{ textAlign:"center", padding:"3rem", color:"#64748b" }}>{icon&&<div style={{ fontSize:40, marginBottom:12 }}>{icon}</div>}<div style={{ fontSize:14, fontWeight:600, color:"#94a3b8", marginBottom:6 }}>{label}</div>{sub&&<div style={{ fontSize:12 }}>{sub}</div>}</div>;
+  const StatCard    = ({ col, icon, label, val, sub, topBorder }) => (
     <div className="hms-stat-card" style={{ borderTop:topBorder?`3px solid ${col}`:undefined, border:`1px solid ${col}15` }}>
-      {icon && <div className="hms-stat-icon">{icon}</div>}
-      {topBorder && <div style={{ fontSize:10, color:col, fontWeight:700, textTransform:"uppercase", letterSpacing:".08em", marginBottom:8 }}>{label}</div>}
+      {icon&&<div className="hms-stat-icon">{icon}</div>}
+      {topBorder&&<div style={{ fontSize:10, color:col, fontWeight:700, textTransform:"uppercase", letterSpacing:".08em", marginBottom:8 }}>{label}</div>}
       <div className="hms-stat-num" style={{ fontSize:topBorder?26:22, color:col }}>{val}</div>
-      {topBorder ? <div className="hms-stat-label">{sub}</div> : <div className="hms-stat-label">{label}</div>}
+      {topBorder?<div className="hms-stat-label">{sub}</div>:<div className="hms-stat-label">{label}</div>}
     </div>
   );
 
@@ -537,19 +539,19 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
     toast("Downloaded");
   };
 
-  // ── PAGE: HOME ────────────────────────────────────────────────────────────
+  // ── PAGES ─────────────────────────────────────────────────────────────────
   const renderHome = () => {
     const pendingTasks = tasks.filter(t=>t.status==="Pending").length;
     const urgentTasks  = tasks.filter(t=>t.priority==="Urgent"&&t.status!=="Completed").length;
     const stats = [
       { label:"Branch Patients",    val:locationPatients.length, col:accent,    icon:"🧑‍⚕️", sub:"All records" },
-      { label:"Total Admissions",   val:allAdmissions.length,    col:"#22d3ee", icon:"📋", sub:"All time" },
-      { label:"Currently Admitted", val:currentlyAdmitted,       col:"#34d399", icon:"🏥", sub:"Active" },
+      { label:"Total Admissions",   val:allAdmissions.length,    col:"#38bdf8", icon:"📋", sub:"All time" },
+      { label:"Currently Admitted", val:currentlyAdmitted,       col:"#0ea5e9", icon:"🏥", sub:"Active" },
       { label:"Discharged",         val:discharged,              col:"#8b949e", icon:"🚪", sub:"Completed" },
-      { label:"Total Tasks",        val:tasks.length,            col:"#818cf8", icon:"✅", sub:"All tasks" },
+      { label:"Total Tasks",        val:tasks.length,            col:"#7dd3fc", icon:"✅", sub:"All tasks" },
       { label:"Pending Tasks",      val:pendingTasks,            col:"#f59e0b", icon:"⏳", sub:"Awaiting action" },
       { label:"Urgent Tasks",       val:urgentTasks,             col:"#f87171", icon:"🚨", sub:"Need attention" },
-      { label:"Departments",        val:departments.length,      col:"#34d399", icon:"🏢", sub:"Active depts" },
+      { label:"Departments",        val:departments.length,      col:"#0284c7", icon:"🏢", sub:"Active depts" },
     ];
     return (
       <div>
@@ -562,27 +564,23 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
             <div style={{ fontSize:10, color:"#64748b" }}>{bc.label} Branch</div>
             <div style={{ display:"flex", gap:8, marginTop:10, flexWrap:"wrap" }}>
               {currentUser?.dept && <Badge col={accent}>{currentUser.dept}</Badge>}
-              <Badge col={currentUser?.status==="Inactive"?"#f87171":"#34d399"}>{currentUser?.status||"Active"}</Badge>
+              <Badge col={currentUser?.status==="Inactive"?"#f87171":"#0ea5e9"}>{currentUser?.status||"Active"}</Badge>
               <Badge col="#6b7280">{currentUser?.id}</Badge>
             </div>
           </div>
         </div>
-        <div className="hms-stat-grid">
-          {stats.map((s,i) => <StatCard key={i} topBorder {...s}/>)}
-        </div>
-        {tasks.length>0 && (
+        <div className="hms-stat-grid">{stats.map((s,i)=><StatCard key={i} topBorder {...s}/>)}</div>
+        {tasks.length>0&&(
           <div className="hms-card">
             <CardRow title="Recent Tasks" action={<button className="hms-add-btn" onClick={()=>setActiveTab("tasks")}>View All</button>}/>
             <TableWrap heads={["Task","Assigned To","Dept","Priority","Status","Due","Patient"]}>
               {tasks.slice(0,5).map((t,i)=>(
                 <tr key={i}>
-                  <Td hi>{t.title}</Td>
-                  <Td>{t.assignedTo}</Td>
+                  <Td hi>{t.title}</Td><Td>{t.assignedTo}</Td>
                   <Td><Badge col={accent}>{t.department}</Badge></Td>
-                  <Td><PriorityPill p={t.priority}/></Td>
-                  <Td><StatusPill s={t.status}/></Td>
+                  <Td><PriorityPill p={t.priority}/></Td><Td><StatusPill s={t.status}/></Td>
                   <Td sm>{fmtDt(t.dueDate)}</Td>
-                  <Td sm>{t.patientName ? <span style={{ color:"#38bdf8" }}>{t.patientName}</span> : "—"}</Td>
+                  <Td sm>{t.patientName?<span style={{ color:"#38bdf8" }}>{t.patientName}</span>:"—"}</Td>
                 </tr>
               ))}
             </TableWrap>
@@ -590,18 +588,16 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
         )}
         <div className="hms-card">
           <CardRow title={`Recent Patients — ${bc.label}`} action={<button className="hms-add-btn" onClick={()=>setActiveTab("patients")}>View All</button>}/>
-          {locationPatients.length===0 ? <div className="hms-empty">No patients yet.</div> : (
+          {locationPatients.length===0?<div className="hms-empty">No patients yet.</div>:(
             <TableWrap heads={["Patient","UHID","Ward","Doctor","Summary","Status","Admit Date"]}>
               {locationPatients.slice(0,5).map((p,i)=>{
                 const last=p.admissions?.[p.admissions.length-1]; const d=last?.discharge||{}; const status=d.dod?"Discharged":"Admitted";
                 return (
                   <tr key={i}>
                     <Td><span className="hms-td-hi">{p.patientName||p.name}</span><div className="hms-td-mono" style={{ marginTop:2 }}>{p.gender} · {p.ageYY||p.age}y</div></Td>
-                    <Td mono>{p.uhid}</Td>
-                    <Td>{d.wardName||"—"}</Td>
-                    <Td sm>{d.doctorName||"—"}</Td>
+                    <Td mono>{p.uhid}</Td><Td>{d.wardName||"—"}</Td><Td sm>{d.doctorName||"—"}</Td>
                     <Td><span style={{ cursor:"pointer" }} onClick={()=>openSummaryEditor(p)}><SummaryPill type={p.dischargeSummary?.type}/></span></Td>
-                    <Td><Badge col={status==="Admitted"?"#34d399":"#8b949e"}>{status}</Badge></Td>
+                    <Td><Badge col={status==="Admitted"?"#0ea5e9":"#8b949e"}>{status}</Badge></Td>
                     <Td sm>{fmtDt(last?.dateTime)}</Td>
                   </tr>
                 );
@@ -613,13 +609,12 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
     );
   };
 
-  // ── PAGE: PATIENTS ────────────────────────────────────────────────────────
   const renderPatients = () => (
     <div>
       <BranchHeader title="Patients"/>
       <div className="hms-ro-banner">◎ View + Edit Qty/Rates/Summaries · {currentUser?.dept||currentUser?.role} · {bc.label}</div>
       <div style={{ display:"flex", gap:10, flexWrap:"wrap", marginBottom:16 }}>
-        {[{label:"Total",val:allAdmissions.length,col:accent},{label:"Admitted",val:currentlyAdmitted,col:"#34d399"},{label:"Discharged",val:discharged,col:"#8b949e"}].map((s,i)=>(
+        {[{label:"Total",val:allAdmissions.length,col:accent},{label:"Admitted",val:currentlyAdmitted,col:"#0ea5e9"},{label:"Discharged",val:discharged,col:"#8b949e"}].map((s,i)=>(
           <div key={i} className="hms-stat-card" style={{ padding:"10px 14px", border:`1px solid ${s.col}18` }}>
             <div className="hms-stat-num" style={{ fontSize:16, color:s.col }}>{s.val}</div>
             <div className="hms-stat-label">{s.label}</div>
@@ -627,7 +622,7 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
         ))}
       </div>
       <div className="hms-card">
-        {locationPatients.length===0 ? <div className="hms-empty">No patients for {bc.label}.</div> : (
+        {locationPatients.length===0?<div className="hms-empty">No patients for {bc.label}.</div>:(
           <TableWrap heads={["Patient/UHID","Contact","Ward/Bed","Doctor","Summary","DOA","DOD","Status","Actions"]}>
             {locationPatients.flatMap((p,pi)=>(p.admissions||[]).map((adm,ai)=>{
               const d=adm.discharge||{}; const status=d.dod?"Discharged":"Admitted";
@@ -638,13 +633,12 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
                   <Td>{d.wardName||"—"}<div className="hms-td-mono">{d.bedNo}</div></Td>
                   <Td sm>{d.doctorName||"—"}</Td>
                   <Td><span style={{ cursor:"pointer" }} onClick={()=>openSummaryEditor(p)}><SummaryPill type={p.dischargeSummary?.type}/></span></Td>
-                  <Td sm>{fmtDt(d.doa)}</Td>
-                  <Td sm>{fmtDt(d.dod)}</Td>
-                  <Td><Badge col={status==="Admitted"?"#34d399":"#8b949e"}>{status}</Badge></Td>
+                  <Td sm>{fmtDt(d.doa)}</Td><Td sm>{fmtDt(d.dod)}</Td>
+                  <Td><Badge col={status==="Admitted"?"#0ea5e9":"#8b949e"}>{status}</Badge></Td>
                   <Td>
                     <div style={{ display:"flex", gap:4, flexWrap:"wrap" }}>
-                      <ActionBtn col="#34d399" onClick={()=>openMedEditor(p)}>Meds</ActionBtn>
-                      <ActionBtn col="#34d399" onClick={()=>openReportEditor(p)}>Reports</ActionBtn>
+                      <ActionBtn col="#0ea5e9" onClick={()=>openMedEditor(p)}>Meds</ActionBtn>
+                      <ActionBtn col="#38bdf8" onClick={()=>openReportEditor(p)}>Reports</ActionBtn>
                       <ActionBtn col="#f59e0b" onClick={()=>downloadDischarge(p,bc.label)}>↓</ActionBtn>
                     </div>
                   </Td>
@@ -657,11 +651,10 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
     </div>
   );
 
-  // ── PAGE: DISCHARGE ───────────────────────────────────────────────────────
   const renderDischarge = () => {
     const summaryStats = SUMMARY_TYPES.reduce((acc,t)=>{acc[t]=locationPatients.filter(p=>p.dischargeSummary?.type===t).length; return acc;},{});
     const unset = locationPatients.filter(p=>!p.dischargeSummary?.diagnosis).length;
-    const filtered = dischSumFilter==="All" ? locationPatients : locationPatients.filter(p=>p.dischargeSummary?.type===dischSumFilter);
+    const filtered = dischSumFilter==="All"?locationPatients:locationPatients.filter(p=>p.dischargeSummary?.type===dischSumFilter);
     return (
       <div>
         <BranchHeader title="Discharge Summaries"/>
@@ -675,31 +668,28 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
         </div>
         <div style={{ marginBottom:14 }}>
           <select className="hms-branch-select" style={{ width:"auto", padding:"7px 28px 7px 12px" }} value={dischSumFilter} onChange={e=>setDischSumFilter(e.target.value)}>
-            <option value="All">All Types</option>
-            {SUMMARY_TYPES.map(t=><option key={t}>{t}</option>)}
+            <option value="All">All Types</option>{SUMMARY_TYPES.map(t=><option key={t}>{t}</option>)}
           </select>
         </div>
         <div className="hms-card">
           <CardRow title={`${filtered.length} Record${filtered.length!==1?"s":""} — ${bc.label}`}
-            action={<ActionBtn col="#f59e0b" onClick={()=>{ filtered.forEach(p=>{ downloadDischarge(p,bc.label); }); toast(`Downloaded ${filtered.length} summaries`); }}>↓ Export All</ActionBtn>}/>
-          {filtered.length===0 ? <div className="hms-empty">No summaries match this filter.</div> : (
+            action={<ActionBtn col="#f59e0b" onClick={()=>{filtered.forEach(p=>{downloadDischarge(p,bc.label);}); toast(`Downloaded ${filtered.length} summaries`);}}>↓ Export All</ActionBtn>}/>
+          {filtered.length===0?<div className="hms-empty">No summaries match this filter.</div>:(
             <TableWrap heads={["Patient","UHID","Type","Diagnosis","Doctor","Discharge Date","Exp. DOD","Meds","Reports","Actions"]}>
               {filtered.map((p,i)=>{
                 const ds=p.dischargeSummary||{}; const adm=p.admissions?.[0]||{}; const d=adm.discharge||{};
                 return (
                   <tr key={i} className="hms-tr-alt">
                     <Td><span className="hms-td-hi">{p.patientName||p.name}</span><div className="hms-td-mono">{p.gender} · {p.ageYY||p.age}y</div></Td>
-                    <Td mono>{p.uhid}</Td>
-                    <Td><SummaryPill type={ds.type}/></Td>
+                    <Td mono>{p.uhid}</Td><Td><SummaryPill type={ds.type}/></Td>
                     <Td>{ds.diagnosis?<span>{ds.diagnosis}</span>:<span style={{ color:"#64748b", fontStyle:"italic", fontSize:10 }}>Not set</span>}</Td>
-                    <Td sm>{ds.doctorName||d.doctorName||"—"}</Td>
-                    <Td sm>{fmtDt(ds.date||d.dod)}</Td>
+                    <Td sm>{ds.doctorName||d.doctorName||"—"}</Td><Td sm>{fmtDt(ds.date||d.dod)}</Td>
                     <Td>{(ds.expectedDod||d.expectedDod)?<span className="hms-exp-dod-pill">⏱ {fmtDt(ds.expectedDod||d.expectedDod)}</span>:<span style={{ color:"#64748b", fontSize:10 }}>—</span>}</Td>
-                    <Td><Badge col="#34d399">{(p.medicines||[]).length}</Badge></Td>
-                    <Td><Badge col="#34d399">{(p.reports||[]).length}</Badge></Td>
+                    <Td><Badge col="#0ea5e9">{(p.medicines||[]).length}</Badge></Td>
+                    <Td><Badge col="#38bdf8">{(p.reports||[]).length}</Badge></Td>
                     <Td>
                       <div style={{ display:"flex", gap:4, flexWrap:"wrap" }}>
-                        <ActionBtn col="#34d399" onClick={()=>openViewModal(p)}>View</ActionBtn>
+                        <ActionBtn col="#0ea5e9" onClick={()=>openViewModal(p)}>View</ActionBtn>
                         <ActionBtn col={accent} onClick={()=>openSummaryEditor(p)}>Edit</ActionBtn>
                         <ActionBtn col="#f59e0b" onClick={()=>downloadDischarge(p,bc.label)}>↓</ActionBtn>
                         <ActionBtn col="#f87171" onClick={()=>confirmDelete(p)}>✕</ActionBtn>
@@ -715,7 +705,6 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
     );
   };
 
-  // ── PAGE: MEDICINES ───────────────────────────────────────────────────────
   const renderMedicines = () => (
     <div>
       <BranchHeader title="Medicines"/>
@@ -725,26 +714,20 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
           <div key={p.uhid} className="hms-card">
             <CardRow title={<><span className="hms-td-hi">{p.patientName||p.name}</span> <span className="hms-td-mono">{p.uhid}</span> <span style={{ color:"#f59e0b" }}>· {fmt(medTotal)}</span></>}
               action={<button className="hms-add-btn" onClick={()=>openMedEditor(p)}>Edit Medicines</button>}/>
-            {!(p.medicines||[]).length ? <div className="hms-empty">No medicines.</div> : (
+            {!(p.medicines||[]).length?<div className="hms-empty">No medicines.</div>:(
               <TableWrap heads={["Medicine","Qty","Rate/unit","Total"]}>
                 {(p.medicines||[]).map((m,i)=>(
-                  <tr key={i}>
-                    <Td hi>{m.name}</Td>
-                    <Td><Badge col={accent}>{m.qty}</Badge></Td>
-                    <Td>{fmt(m.rate)}</Td>
-                    <Td><span style={{ color:"#f59e0b", fontWeight:700 }}>{fmt(m.qty*m.rate)}</span></Td>
-                  </tr>
+                  <tr key={i}><Td hi>{m.name}</Td><Td><Badge col={accent}>{m.qty}</Badge></Td><Td>{fmt(m.rate)}</Td><Td><span style={{ color:"#f59e0b", fontWeight:700 }}>{fmt(m.qty*m.rate)}</span></Td></tr>
                 ))}
               </TableWrap>
             )}
           </div>
         );
       })}
-      {!locationPatients.length && <div className="hms-card hms-empty">No patients for {bc.label}.</div>}
+      {!locationPatients.length&&<div className="hms-card hms-empty">No patients for {bc.label}.</div>}
     </div>
   );
 
-  // ── PAGE: REPORTS ─────────────────────────────────────────────────────────
   const renderReports = () => (
     <div>
       <BranchHeader title="Reports"/>
@@ -757,7 +740,7 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
                 <button className="hms-add-btn" onClick={()=>openReportEditor(p)}>Edit</button>
               </div>
             }/>
-          {!(p.reports||[]).length ? <div className="hms-empty">No reports.</div> : (
+          {!(p.reports||[]).length?<div className="hms-empty">No reports.</div>:(
             <TableWrap heads={["Report","Date","Result"]}>
               {(p.reports||[]).map((r,i)=>(
                 <tr key={i}><Td hi>{r.name}</Td><Td sm>{r.date}</Td><Td>{r.result}</Td></tr>
@@ -766,11 +749,10 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
           )}
         </div>
       ))}
-      {!locationPatients.length && <div className="hms-card hms-empty">No patients.</div>}
+      {!locationPatients.length&&<div className="hms-card hms-empty">No patients.</div>}
     </div>
   );
 
-  // ── PAGE: BILLING ─────────────────────────────────────────────────────────
   const renderBilling = () => {
     const billRows = locationPatients.flatMap(p=>(p.admissions||[]).filter(a=>a.billing&&(parseFloat(a.billing.paidNow)||0)+(parseFloat(a.billing.advance)||0)>0).map(a=>({patient:p.patientName||p.name,uhid:p.uhid,admNo:a.admNo,advance:parseFloat(a.billing.advance)||0,paidNow:parseFloat(a.billing.paidNow)||0,discount:parseFloat(a.billing.discount)||0,mode:a.billing.paymentMode||"—",total:(parseFloat(a.billing.advance)||0)+(parseFloat(a.billing.paidNow)||0)})));
     const grandTotal=billRows.reduce((s,r)=>s+r.total,0); const totalAdv=billRows.reduce((s,r)=>s+r.advance,0);
@@ -778,7 +760,7 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
       <div>
         <BranchHeader title="Billing"/>
         <div className="hms-stat-grid">
-          {[{label:"Total Collected",val:fmt(grandTotal),col:"#f59e0b"},{label:"Advance",val:fmt(totalAdv),col:"#34d399"},{label:"Records",val:billRows.length,col:"#34d399"}].map((s,i)=>(
+          {[{label:"Total Collected",val:fmt(grandTotal),col:"#f59e0b"},{label:"Advance",val:fmt(totalAdv),col:"#0ea5e9"},{label:"Records",val:billRows.length,col:"#38bdf8"}].map((s,i)=>(
             <div key={i} className="hms-stat-card" style={{ border:`1px solid ${s.col}18` }}>
               <div className="hms-stat-num" style={{ color:s.col }}>{s.val}</div>
               <div className="hms-stat-label">{s.label}</div>
@@ -786,15 +768,14 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
           ))}
         </div>
         <div className="hms-card">
-          {!billRows.length ? <div className="hms-empty">No billing records.</div> : (
+          {!billRows.length?<div className="hms-empty">No billing records.</div>:(
             <TableWrap heads={["Patient","UHID","Adm#","Advance","Paid","Discount","Mode","Total"]}>
               {billRows.map((r,i)=>(
                 <tr key={i}>
-                  <Td hi>{r.patient}</Td>
-                  <Td mono>{r.uhid}</Td>
+                  <Td hi>{r.patient}</Td><Td mono>{r.uhid}</Td>
                   <Td><Badge col={accent}>#{r.admNo}</Badge></Td>
-                  <Td><span style={{ color:"#34d399", fontWeight:700 }}>{fmt(r.advance)}</span></Td>
-                  <Td><span style={{ color:"#34d399", fontWeight:700 }}>{fmt(r.paidNow)}</span></Td>
+                  <Td><span style={{ color:"#0ea5e9", fontWeight:700 }}>{fmt(r.advance)}</span></Td>
+                  <Td><span style={{ color:"#38bdf8", fontWeight:700 }}>{fmt(r.paidNow)}</span></Td>
                   <Td>{r.discount>0?<span style={{ color:"#c084fc" }}>{fmt(r.discount)}</span>:"—"}</Td>
                   <Td sm>{r.mode}</Td>
                   <Td><span style={{ color:"#f59e0b", fontWeight:700 }}>{fmt(r.total)}</span></Td>
@@ -807,14 +788,13 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
     );
   };
 
-  // ── PAGE: EXPORT ──────────────────────────────────────────────────────────
   const renderExport = () => {
     const exportOptions = [
-      {id:"discharge",     label:"Discharge Summary",   desc:"Full clinical summary .txt per patient", icon:"📋"},
-      {id:"medical",       label:"Medical History",      desc:"Medical history .txt per patient",       icon:"🏥"},
-      {id:"medicines",     label:"Medicines",            desc:"Medicines with qty & rates as .csv",     icon:"💊"},
-      {id:"reports",       label:"Investigation Reports",desc:"Lab/radiology results as .csv",          icon:"🔬"},
-      {id:"patientHistory",label:"Patient History",      desc:"Full patient list as .xlsx",             icon:"📊"},
+      {id:"discharge",     label:"Discharge Summary",    desc:"Full clinical summary .txt per patient", icon:"📋"},
+      {id:"medical",       label:"Medical History",       desc:"Medical history .txt per patient",       icon:"🏥"},
+      {id:"medicines",     label:"Medicines",             desc:"Medicines with qty & rates as .csv",     icon:"💊"},
+      {id:"reports",       label:"Investigation Reports", desc:"Lab/radiology results as .csv",          icon:"🔬"},
+      {id:"patientHistory",label:"Patient History",       desc:"Full patient list as .xlsx",             icon:"📊"},
     ];
     const previewPts = getExportPatients();
     return (
@@ -831,13 +811,13 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
             <select className="hms-sel" value={exportSumType} onChange={e=>setExportSumType(e.target.value)}>
               <option value="All">All Types</option>{SUMMARY_TYPES.map(t=><option key={t}>{t}</option>)}
             </select>
-            <div style={{ fontSize:10, color:"#64748b" }}>{previewPts.length} patient(s) match</div>
+            <div style={{ fontSize:10, color:"#64748b", marginTop:8 }}>{previewPts.length} patient(s) match</div>
           </div>
           <div className="hms-card">
             <div className="hms-section-label">Export Type</div>
             {exportOptions.map(o=>(
               <div key={o.id} className="hms-export-type-row"
-                style={{ background:exportType===o.id?`${accent}18`:"transparent", borderColor:exportType===o.id?`${accent}50`:"#1a2540" }}
+                style={{ background:exportType===o.id?`${accent}18`:"transparent", borderColor:exportType===o.id?`${accent}50`:"" }}
                 onClick={()=>setExportType(o.id)}>
                 <span style={{ fontSize:15 }}>{o.icon}</span>
                 <div>
@@ -860,8 +840,8 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
                 <Td><Badge col={BC[p._branch]?.accent||"#6b7280"}>{p._branchLabel}</Badge></Td>
                 <Td><Badge col={SUMMARY_META[p.dischargeSummary?.type]?.color||"#6b7280"}>{p.dischargeSummary?.type||"—"}</Badge></Td>
                 <Td><ActionBtn col="#f59e0b" onClick={()=>downloadDischarge(p,p._branchLabel)}>↓</ActionBtn></Td>
-                <Td><ActionBtn col="#34d399" onClick={()=>{exportTxt(`medhistory_${p.uhid}.txt`,`Medical History\nPatient: ${p.patientName||p.name}\nUHID: ${p.uhid}`);toast("Downloaded");}}>↓</ActionBtn></Td>
-                <Td><ActionBtn col="#34d399" onClick={()=>{exportCSV(`meds_${p.uhid}.csv`,(p.medicines||[]).map(m=>({Medicine:m.name,Qty:m.qty,Rate:m.rate,Total:m.qty*m.rate})),["Medicine","Qty","Rate","Total"]);toast("Downloaded");}}>↓</ActionBtn></Td>
+                <Td><ActionBtn col="#0ea5e9" onClick={()=>{exportTxt(`medhistory_${p.uhid}.txt`,`Medical History\nPatient: ${p.patientName||p.name}\nUHID: ${p.uhid}`);toast("Downloaded");}}>↓</ActionBtn></Td>
+                <Td><ActionBtn col="#38bdf8" onClick={()=>{exportCSV(`meds_${p.uhid}.csv`,(p.medicines||[]).map(m=>({Medicine:m.name,Qty:m.qty,Rate:m.rate,Total:m.qty*m.rate})),["Medicine","Qty","Rate","Total"]);toast("Downloaded");}}>↓</ActionBtn></Td>
                 <Td><ActionBtn col="#c084fc" onClick={()=>{exportCSV(`reports_${p.uhid}.csv`,(p.reports||[]).map(r=>({Report:r.name,Date:r.date,Result:r.result})),["Report","Date","Result"]);toast("Downloaded");}}>↓</ActionBtn></Td>
               </tr>
             ))}
@@ -871,14 +851,13 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
     );
   };
 
-  // ── PAGE: TASKS ───────────────────────────────────────────────────────────
   const renderTasks = () => {
     const ts = { total:tasks.length, pending:tasks.filter(t=>t.status==="Pending").length, inprogress:tasks.filter(t=>t.status==="In Progress").length, completed:tasks.filter(t=>t.status==="Completed").length, urgent:tasks.filter(t=>t.priority==="Urgent"&&t.status!=="Completed").length };
     return (
       <div>
         <PageHeader title="Task Manager" subtitle="Assign and track tasks across all departments"/>
         <div className="hms-stat-grid">
-          {[{label:"Total",val:ts.total,col:accent},{label:"Pending",val:ts.pending,col:"#f59e0b"},{label:"In Progress",val:ts.inprogress,col:"#38bdf8"},{label:"Completed",val:ts.completed,col:"#34d399"},{label:"Urgent",val:ts.urgent,col:"#f87171"}].map((s,i)=>(
+          {[{label:"Total",val:ts.total,col:accent},{label:"Pending",val:ts.pending,col:"#f59e0b"},{label:"In Progress",val:ts.inprogress,col:"#0ea5e9"},{label:"Completed",val:ts.completed,col:"#38bdf8"},{label:"Urgent",val:ts.urgent,col:"#f87171"}].map((s,i)=>(
             <div key={i} className="hms-stat-card" style={{ padding:"12px 14px", border:`1px solid ${s.col}18` }}>
               <div className="hms-stat-num" style={{ fontSize:20, color:s.col }}>{s.val}</div>
               <div className="hms-stat-label">{s.label}</div>
@@ -887,13 +866,12 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
         </div>
         <div className="hms-card">
           <CardRow title="All Tasks" action={<button className="hms-add-btn" onClick={openNewTask}>+ Assign Task</button>}/>
-          {!tasks.length ? <EmptyState icon="✅" label="No tasks yet" sub='Click "Assign Task" to create the first task'/> : (
+          {!tasks.length?<EmptyState icon="✅" label="No tasks yet" sub='Click "Assign Task" to create the first task'/>:(
             <TableWrap heads={["Task","Assigned To","Dept","Priority","Status","Due Date","Patient","Created By","Actions"]}>
               {tasks.map((t,i)=>(
                 <tr key={t.id} className="hms-tr-alt">
                   <Td><span className="hms-td-hi">{t.title}</span>{t.description&&<div style={{ fontSize:9, color:"#64748b", marginTop:2, maxWidth:180 }}>{t.description.slice(0,60)}{t.description.length>60?"…":""}</div>}</Td>
-                  <Td>{t.assignedTo}</Td>
-                  <Td><Badge col={accent}>{t.department}</Badge></Td>
+                  <Td>{t.assignedTo}</Td><Td><Badge col={accent}>{t.department}</Badge></Td>
                   <Td><PriorityPill p={t.priority}/></Td>
                   <Td>
                     <select className="hms-task-status-sel"
@@ -903,7 +881,7 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
                     </select>
                   </Td>
                   <Td sm style={{ color:t.dueDate&&new Date(t.dueDate)<new Date()&&t.status!=="Completed"?"#f87171":"#64748b" }}>{fmtDt(t.dueDate)}</Td>
-                  <Td sm>{t.patientName ? <span style={{ color:"#38bdf8" }}>{t.patientName}<div style={{ fontSize:9, color:"#64748b" }}>{t.patientUhid}</div></span> : "—"}</Td>
+                  <Td sm>{t.patientName?<span style={{ color:"#38bdf8" }}>{t.patientName}<div style={{ fontSize:9, color:"#64748b" }}>{t.patientUhid}</div></span>:"—"}</Td>
                   <Td sm>{t.createdBy||"—"}</Td>
                   <Td>
                     <div style={{ display:"flex", gap:4 }}>
@@ -920,7 +898,6 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
     );
   };
 
-  // ── PAGE: TASK REPORT ─────────────────────────────────────────────────────
   const renderTaskReport = () => {
     const periodLabel = { all:"All Time", today:"Today", week:"This Week", month:"This Month" };
     const empMap = {};
@@ -946,8 +923,7 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
             </div>
             <div><label className="hms-lbl">Department</label>
               <select className="hms-sel" value={taskReportFilter.dept} onChange={e=>setTaskReportFilter(f=>({...f,dept:e.target.value}))}>
-                <option value="All">All Departments</option>
-                {allDeptOptions.map(d=><option key={d}>{d}</option>)}
+                <option value="All">All Departments</option>{allDeptOptions.map(d=><option key={d}>{d}</option>)}
               </select>
             </div>
             <div><label className="hms-lbl">Status</label>
@@ -960,7 +936,7 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
             </div>
           </div>
           <div style={{ display:"flex", gap:8, marginTop:6, alignItems:"center" }}>
-            <ActionBtn col="#34d399" onClick={()=>{exportTasksXLSX(filteredTaskReport,`task_report_${taskReportFilter.period}_${taskReportFilter.dept}.xlsx`);toast("Task report exported as XLSX");}}>↓ XLSX</ActionBtn>
+            <ActionBtn col="#0ea5e9" onClick={()=>{exportTasksXLSX(filteredTaskReport,`task_report_${taskReportFilter.period}_${taskReportFilter.dept}.xlsx`);toast("Task report exported as XLSX");}}>↓ XLSX</ActionBtn>
             <ActionBtn col="#38bdf8" onClick={()=>{exportCSV(`task_report_${taskReportFilter.period}.csv`,filteredTaskReport.map(t=>({TaskID:t.id,Title:t.title,AssignedTo:t.assignedTo,Department:t.department,Priority:t.priority,Status:t.status,DueDate:t.dueDate||"—",CreatedDate:t.createdAt?.split("T")[0]||"—",Description:t.description||"—",CompletedDate:t.completedAt?.split("T")[0]||"—",PatientName:t.patientName||"—",PatientUHID:t.patientUhid||"—"})),["TaskID","Title","AssignedTo","Department","Priority","Status","DueDate","CreatedDate","Description","CompletedDate","PatientName","PatientUHID"]);toast("Task report exported as CSV");}}>↓ CSV</ActionBtn>
             <span style={{ marginLeft:"auto", fontSize:11, color:"#64748b" }}><strong>{filteredTaskReport.length}</strong> record{filteredTaskReport.length!==1?"s":""} · <span style={{ color:accent }}>{periodLabel[taskReportFilter.period]}</span></span>
           </div>
@@ -975,23 +951,22 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
         </div>
         <div className="hms-card">
           <div className="hms-card-title" style={{ marginBottom:14 }}>Employee Task Summary — {periodLabel[taskReportFilter.period]}</div>
-          {!empList.length ? <div className="hms-empty">No tasks match current filters.</div> : (
+          {!empList.length?<div className="hms-empty">No tasks match current filters.</div>:(
             <TableWrap heads={["Employee","Department","Total","Pending","In Progress","Completed","On Hold","Completion %"]}>
               {empList.map((e,i)=>{
                 const pct=e.total?Math.round((e.completed/e.total)*100):0;
                 return (
                   <tr key={i}>
-                    <Td hi>{e.name}</Td>
-                    <Td><Badge col={accent}>{e.dept}</Badge></Td>
+                    <Td hi>{e.name}</Td><Td><Badge col={accent}>{e.dept}</Badge></Td>
                     <Td><strong>{e.total}</strong></Td>
                     <Td><span style={{ color:"#f59e0b" }}>{e.pending}</span></Td>
-                    <Td><span style={{ color:"#38bdf8" }}>{e.inprogress}</span></Td>
-                    <Td><span style={{ color:"#34d399" }}>{e.completed}</span></Td>
+                    <Td><span style={{ color:"#0ea5e9" }}>{e.inprogress}</span></Td>
+                    <Td><span style={{ color:"#38bdf8" }}>{e.completed}</span></Td>
                     <Td><span style={{ color:"#f87171" }}>{e.onhold}</span></Td>
                     <Td>
                       <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                        <div className="hms-progress-bar-sm"><div className="hms-progress-fill" style={{ width:`${pct}%`, background:"#34d399" }}/></div>
-                        <span style={{ fontSize:10, fontWeight:700, color:pct>=75?"#34d399":pct>=50?"#f59e0b":"#f87171", minWidth:32 }}>{pct}%</span>
+                        <div className="hms-progress-bar-sm"><div className="hms-progress-fill" style={{ width:`${pct}%`, background:"#0ea5e9" }}/></div>
+                        <span style={{ fontSize:10, fontWeight:700, color:pct>=75?"#38bdf8":pct>=50?"#f59e0b":"#f87171", minWidth:32 }}>{pct}%</span>
                       </div>
                     </Td>
                   </tr>
@@ -1002,20 +977,17 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
         </div>
         <div className="hms-card">
           <div className="hms-card-title" style={{ marginBottom:14 }}>Detailed Task List ({filteredTaskReport.length})</div>
-          {!filteredTaskReport.length ? <div className="hms-empty">No tasks match the selected filters.</div> : (
+          {!filteredTaskReport.length?<div className="hms-empty">No tasks match the selected filters.</div>:(
             <TableWrap heads={["Task ID","Title","Assigned To","Dept","Priority","Status","Due Date","Created","Patient","Completed"]}>
               {filteredTaskReport.map((t,i)=>(
                 <tr key={t.id} className="hms-tr-alt">
                   <Td mono>{t.id}</Td>
                   <Td><span className="hms-td-hi">{t.title}</span>{t.description&&<div style={{ fontSize:9, color:"#64748b", marginTop:1 }}>{t.description.slice(0,50)}{t.description.length>50?"…":""}</div>}</Td>
-                  <Td>{t.assignedTo}</Td>
-                  <Td><Badge col={accent}>{t.department}</Badge></Td>
-                  <Td><PriorityPill p={t.priority}/></Td>
-                  <Td><StatusPill s={t.status}/></Td>
-                  <Td sm>{fmtDt(t.dueDate)}</Td>
-                  <Td sm>{t.createdAt?.split("T")[0]||"—"}</Td>
-                  <Td sm>{t.patientName ? <span style={{ color:"#38bdf8" }}>{t.patientName}</span> : "—"}</Td>
-                  <Td><span style={{ fontSize:10, color:"#34d399" }}>{t.completedAt?.split("T")[0]||"—"}</span></Td>
+                  <Td>{t.assignedTo}</Td><Td><Badge col={accent}>{t.department}</Badge></Td>
+                  <Td><PriorityPill p={t.priority}/></Td><Td><StatusPill s={t.status}/></Td>
+                  <Td sm>{fmtDt(t.dueDate)}</Td><Td sm>{t.createdAt?.split("T")[0]||"—"}</Td>
+                  <Td sm>{t.patientName?<span style={{ color:"#38bdf8" }}>{t.patientName}</span>:"—"}</Td>
+                  <Td><span style={{ fontSize:10, color:"#0ea5e9" }}>{t.completedAt?.split("T")[0]||"—"}</span></Td>
                 </tr>
               ))}
             </TableWrap>
@@ -1025,7 +997,6 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
     );
   };
 
-  // ── PAGE: DEPARTMENTS ─────────────────────────────────────────────────────
   const renderDepartments = () => {
     const deptList = [...DEPT_OPTIONS.map(name=>({id:`default-${name}`,name,description:`${name} Department`,isDefault:true,memberCount:employees.filter(e=>e.dept===name).length})),...departments.filter(d=>!DEPT_OPTIONS.includes(d.name)).map(d=>({...d,isDefault:false,memberCount:employees.filter(e=>e.dept===d.name).length}))];
     return (
@@ -1044,19 +1015,19 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
               <div key={dept.id} className="hms-dept-card" style={{ borderColor:`${dA}30`, borderTopColor:dA }}>
                 <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:12 }}>
                   <div style={{ width:36,height:36,borderRadius:10,background:`${dA}20`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18 }}>{DEPT_ICONS[dept.name]||"🏢"}</div>
-                  {dept.isDefault ? <Badge col={accent}>DEFAULT</Badge> : <button onClick={()=>setDepartments(prev=>prev.filter(d=>d.id!==dept.id))} style={{ background:"transparent",border:"none",color:"#64748b",cursor:"pointer",fontSize:12,padding:"2px 6px" }}>✕</button>}
+                  {dept.isDefault?<Badge col={accent}>DEFAULT</Badge>:<button onClick={()=>setDepartments(prev=>prev.filter(d=>d.id!==dept.id))} style={{ background:"transparent",border:"none",color:"#64748b",cursor:"pointer",fontSize:12,padding:"2px 6px" }}>✕</button>}
                 </div>
                 <div style={{ fontSize:13, fontWeight:700, marginBottom:4 }}>{dept.name}</div>
                 <div style={{ fontSize:10, color:"#64748b", marginBottom:12, lineHeight:1.5 }}>{dept.description}</div>
                 <div style={{ display:"flex", gap:10, marginBottom:deptTasks.length?10:0 }}>
-                  {[{label:"Members",val:dept.memberCount,col:dA},{label:"Tasks",val:deptTasks.length,col:"#38bdf8"},{label:"Done",val:completedTasks,col:"#34d399"}].map((s,j)=>(
+                  {[{label:"Members",val:dept.memberCount,col:dA},{label:"Tasks",val:deptTasks.length,col:"#38bdf8"},{label:"Done",val:completedTasks,col:"#0ea5e9"}].map((s,j)=>(
                     <div key={j} style={{ textAlign:"center" }}>
                       <div style={{ fontSize:18,fontWeight:800,color:s.col }}>{s.val}</div>
                       <div style={{ fontSize:9,color:"#64748b" }}>{s.label}</div>
                     </div>
                   ))}
                 </div>
-                {deptTasks.length>0 && (
+                {deptTasks.length>0&&(
                   <div>
                     <div style={{ display:"flex",justifyContent:"space-between",fontSize:9,color:"#64748b",marginBottom:4 }}><span>Progress</span><span>{pct}%</span></div>
                     <ProgressBar pct={pct} col={dA}/>
@@ -1070,30 +1041,28 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
     );
   };
 
-  // ── PAGE: EMPLOYEES ───────────────────────────────────────────────────────
   const renderEmployees = () => (
     <div>
       <PageHeader title="Employee Management" subtitle="Manage staff accounts and credentials"/>
       <div style={{ display:"flex", justifyContent:"flex-end", marginBottom:16 }}>
         <button className="hms-add-btn-lg" onClick={()=>setShowEmpModal(true)}>+ Create Employee</button>
       </div>
-      {!employees.length ? <EmptyState icon="👤" label="No employees yet" sub='Click "Create Employee" to add your first employee'/> : (
+      {!employees.length?<EmptyState icon="👤" label="No employees yet" sub='Click "Create Employee" to add your first employee'/>:(
         <div className="hms-card" style={{ padding:0, overflow:"hidden" }}>
           <TableWrap heads={["Emp ID","Full Name","Username","Role","Department","Email","Phone","Status","Actions"]}>
             {employees.map((emp,i)=>(
-              <tr key={i} style={{ borderBottom:"1px solid #1e2a3a" }}>
+              <tr key={i}>
                 <Td mono style={{ color:accent }}>{emp.empId||emp.id}</Td>
                 <Td hi>{emp.fullName||emp.name}</Td>
                 <Td sm>{emp.username}</Td>
-                <Td><Badge col="#818cf8">{emp.role||"Staff"}</Badge></Td>
+                <Td><Badge col="#7dd3fc">{emp.role||"Staff"}</Badge></Td>
                 <Td><Badge col={accent}>{emp.dept}</Badge></Td>
-                <Td sm>{emp.email}</Td>
-                <Td sm>{emp.phone}</Td>
-                <Td><Badge col={emp.status==="Inactive"?"#f87171":"#34d399"}>{emp.status||"Active"}</Badge></Td>
+                <Td sm>{emp.email}</Td><Td sm>{emp.phone}</Td>
+                <Td><Badge col={emp.status==="Inactive"?"#f87171":"#0ea5e9"}>{emp.status||"Active"}</Badge></Td>
                 <Td>
                   <div style={{ display:"flex", gap:6 }}>
                     <ActionBtn col="#f59e0b" onClick={()=>{ const p=prompt("Set new password for "+(emp.fullName||emp.name)+":"); if(p){setEmployees(prev=>prev.map((e,ei)=>ei===i?{...e,password:p}:e));toast("Password reset successfully");} }}>🔑 Reset</ActionBtn>
-                    <ActionBtn col={emp.status==="Inactive"?"#34d399":"#f87171"} onClick={()=>{setEmployees(prev=>prev.map((e,ei)=>ei===i?{...e,status:e.status==="Inactive"?"Active":"Inactive"}:e));toast(emp.status==="Inactive"?"Employee activated":"Employee deactivated");}}>
+                    <ActionBtn col={emp.status==="Inactive"?"#0ea5e9":"#f87171"} onClick={()=>{setEmployees(prev=>prev.map((e,ei)=>ei===i?{...e,status:e.status==="Inactive"?"Active":"Inactive"}:e));toast(emp.status==="Inactive"?"Employee activated":"Employee deactivated");}}>
                       {emp.status==="Inactive"?"✓ Activate":"⊘ Deactivate"}
                     </ActionBtn>
                   </div>
@@ -1106,26 +1075,22 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
     </div>
   );
 
-  // ── PAGE: PROFILE ─────────────────────────────────────────────────────────
   const renderProfile = () => (
     <div>
       <BranchHeader title="My Profile"/>
       <div className="hms-prof-card" style={{ display:"flex",flexDirection:"column",alignItems:"center",textAlign:"center", border:`1px solid ${accent}30` }}>
-        <div style={{ width:70,height:70,borderRadius:"50%",background:`linear-gradient(135deg,${accent},#818cf8)`,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,fontSize:22,color:"#fff",marginBottom:12 }}>{initials(currentUser?.name)}</div>
+        <div style={{ width:70,height:70,borderRadius:"50%",background:`linear-gradient(135deg,${accent},#0284c7)`,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,fontSize:22,color:"#fff",marginBottom:12 }}>{initials(currentUser?.name)}</div>
         <div style={{ fontSize:16, fontWeight:700, marginBottom:3 }}>{currentUser?.name}</div>
         <div style={{ fontSize:11, color:accent, fontWeight:600, marginBottom:4 }}>{currentUser?.dept||currentUser?.role?.toUpperCase()}</div>
         <div style={{ fontSize:10, color:"#64748b", marginBottom:10 }}>{bc.label} Branch</div>
-        <Badge col="#34d399">Active</Badge>
+        <Badge col="#0ea5e9">Active</Badge>
       </div>
       <div className="hms-card">
         <div className="hms-card-title" style={{ marginBottom:14 }}>Account Details</div>
         <table className="hms-tbl">
           <tbody>
             {[["Employee ID",currentUser?.id],["Full Name",currentUser?.name],["Department",currentUser?.dept||"—"],["Role",currentUser?.role],["Home Branch",BC[homeBranch]?.label||homeBranch],["Status","Active"],["Created By",currentUser?.createdBy||"Admin"]].map(([k,v])=>(
-              <tr key={k}>
-                <Td sm style={{ width:150, fontWeight:700, textTransform:"uppercase", letterSpacing:".06em" }}>{k}</Td>
-                <Td style={{ fontFamily:k==="Employee ID"?"monospace":"inherit" }}>{v||"—"}</Td>
-              </tr>
+              <tr key={k}><Td sm style={{ width:150, fontWeight:700, textTransform:"uppercase", letterSpacing:".06em" }}>{k}</Td><Td style={{ fontFamily:k==="Employee ID"?"monospace":"inherit" }}>{v||"—"}</Td></tr>
             ))}
           </tbody>
         </table>
@@ -1133,7 +1098,6 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
     </div>
   );
 
-  // ── RENDER ────────────────────────────────────────────────────────────────
   const renderContent = () => {
     switch(activeTab) {
       case "home":        return renderHome();
@@ -1155,12 +1119,12 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
   const sbWidth = collapsed ? 52 : 220;
 
   return (
-    <div className="hms-wrap">
+    <div className="hms-wrap" style={{ display:"flex", flexDirection:"column", height:"100vh", overflow:"hidden" }}>
       <style>{DYNAMIC_CSS(accent, isDark)}</style>
 
       {/* NOTIFICATION */}
-      {notif && (
-        <div className="hms-notif" style={{ background:notif.type==="ok"?(isDark?"#052e1c":"#f0fdf4"):(isDark?"#3b0f05":"#fef2f2"), borderColor:notif.type==="ok"?"#34d399":"#f87171", color:notif.type==="ok"?"#86efac":"#fca5a5" }}>
+      {notif&&(
+        <div className="hms-notif" style={{ background:notif.type==="ok"?(isDark?"#040d1a":"#f0f9ff"):(isDark?"#1a0505":"#fef2f2"), borderColor:notif.type==="ok"?accent:"#f87171", color:notif.type==="ok"?accent:"#fca5a5" }}>
           {notif.type==="ok"?"✓ ":"⚠ "}{notif.msg}
         </div>
       )}
@@ -1186,8 +1150,8 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
         {/* SIDEBAR */}
         <aside className="hms-sb" style={{ width:sbWidth }}>
           <div className="hms-sb-top" style={{ padding:collapsed?"14px 8px":"14px 12px" }}>
-            {!collapsed && <div className="hms-branch-label">Branch</div>}
-            {collapsed ? (
+            {!collapsed&&<div className="hms-branch-label">Branch</div>}
+            {collapsed?(
               <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
                 {BRANCH_KEYS.map(bk=>(
                   <button key={bk} className="hms-branch-dot-btn" onClick={()=>setViewBranch(bk)} style={{ background:viewBranch===bk?BC[bk].dim:"transparent" }}>
@@ -1195,33 +1159,30 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
                   </button>
                 ))}
               </div>
-            ) : (
+            ):(
               <select className="hms-branch-select" value={viewBranch} onChange={e=>setViewBranch(e.target.value)}>
                 {BRANCH_KEYS.map(bk=><option key={bk} value={bk}>{BC[bk].label}</option>)}
               </select>
             )}
           </div>
-
           <nav className="hms-nav-wrap">
-            {!collapsed && <div className="hms-nav-section" style={{ padding:"0 14px" }}>Menu</div>}
+            {!collapsed&&<div className="hms-nav-section" style={{ padding:"0 14px", fontSize:9, letterSpacing:".14em", textTransform:"uppercase", marginBottom:4 }}>Menu</div>}
             {NAV.map(item=>(
               <div key={item.id} className={`hms-nav-item${activeTab===item.id?" active":""}`}
                 style={{ padding:collapsed?"10px 0":"10px 14px", justifyContent:collapsed?"center":"flex-start" }}
                 onClick={()=>setActiveTab(item.id)} title={item.label}>
                 <span className="hms-nav-icon">{item.icon}</span>
-                {!collapsed && item.label}
+                {!collapsed&&item.label}
               </div>
             ))}
           </nav>
-
-          {!collapsed && (
-            <div style={{ padding:"10px 12px", borderTop:"1px solid #1e2030", borderBottom:"1px solid #1e2030" }}>
-              <div className="hms-signed-in">Signed in as</div>
-              <div className="hms-signed-name">{currentUser?.name}</div>
-              <div className="hms-signed-role">{currentUser?.dept||currentUser?.role}</div>
+          {!collapsed&&(
+            <div style={{ padding:"10px 12px", borderTop:`1px solid ${isDark?"#0e2a45":"#e0f2fe"}`, borderBottom:`1px solid ${isDark?"#0e2a45":"#e0f2fe"}` }}>
+              <div className="hms-signed-in" style={{ fontSize:9, marginBottom:2 }}>Signed in as</div>
+              <div className="hms-signed-name" style={{ fontSize:11, fontWeight:600 }}>{currentUser?.name}</div>
+              <div className="hms-signed-role" style={{ fontSize:9, marginTop:1 }}>{currentUser?.dept||currentUser?.role}</div>
             </div>
           )}
-
           <div className="hms-sb-bot" style={{ padding:collapsed?"10px 8px":"10px 12px" }}>
             <button className="hms-col-btn" onClick={()=>setCollapsed(x=>!x)}>{collapsed?"▶":"◀"}</button>
           </div>
@@ -1231,17 +1192,14 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
       </div>
 
       {/* ══ TASK MODAL ══ */}
-      {showTaskModal && (
+      {showTaskModal&&(
         <div className="hms-modal-overlay" onClick={e=>e.target===e.currentTarget&&(setShowTaskModal(false),setEditTask(null))}>
           <div className="hms-modal-box" style={{ width:520 }}>
             <div className="hms-modal-title">{editTask?"Edit Task":"Assign New Task"}</div>
-
             <label className="hms-lbl">Task Title *</label>
             <input className="hms-inp" placeholder="E.g. Prepare daily billing report" value={taskForm.title} onChange={e=>setTaskForm(f=>({...f,title:e.target.value}))}/>
-
             <label className="hms-lbl">Description</label>
             <textarea className="hms-textarea" placeholder="Task details…" value={taskForm.description} onChange={e=>setTaskForm(f=>({...f,description:e.target.value}))}/>
-
             <div className="hms-g2">
               <div>
                 <label className="hms-lbl">Assigned To *</label>
@@ -1255,7 +1213,6 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
                 </select>
               </div>
             </div>
-
             <div className="hms-g2">
               <div>
                 <label className="hms-lbl">Priority</label>
@@ -1268,38 +1225,28 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
                 <input className="hms-inp" type="date" value={taskForm.dueDate} onChange={e=>setTaskForm(f=>({...f,dueDate:e.target.value}))}/>
               </div>
             </div>
-
-            {/* ── PATIENT SELECTION ── */}
             <label className="hms-lbl">Link to Patient <span style={{ color:"#64748b", fontWeight:400 }}>(optional)</span></label>
-            {taskForm.patientUhid ? (
+            {taskForm.patientUhid?(
               <div className="hms-patient-selected-pill">
                 🧑‍⚕️ {taskForm.patientName}
                 <span style={{ color:"#64748b", fontSize:10, fontWeight:400 }}> · {taskForm.patientUhid}</span>
                 <button className="hms-patient-clear-btn" onClick={()=>setTaskForm(f=>({...f,patientUhid:"",patientName:""}))}>✕</button>
               </div>
-            ) : (
+            ):(
               <>
-                <input
-                  className="hms-patient-search"
-                  placeholder="Search by patient name or UHID…"
-                  value={taskPatientSearch}
-                  onChange={e=>setTaskPatientSearch(e.target.value)}
-                />
+                <input className="hms-patient-search" placeholder="Search by patient name or UHID…" value={taskPatientSearch} onChange={e=>setTaskPatientSearch(e.target.value)}/>
                 <div className="hms-patient-select-box">
-                  {filteredTaskPatients.length === 0 ? (
+                  {filteredTaskPatients.length===0?(
                     <div style={{ padding:"10px 12px", fontSize:11, color:"#64748b", textAlign:"center" }}>No patients found</div>
-                  ) : filteredTaskPatients.map(p=>(
-                    <div
-                      key={p.uhid}
-                      className={`hms-patient-select-item${taskForm.patientUhid===p.uhid?" selected":""}`}
-                      onClick={()=>{ setTaskForm(f=>({...f,patientUhid:p.uhid,patientName:p.name})); setTaskPatientSearch(""); }}
-                    >
+                  ):filteredTaskPatients.map(p=>(
+                    <div key={p.uhid} className={`hms-patient-select-item${taskForm.patientUhid===p.uhid?" selected":""}`}
+                      onClick={()=>{ setTaskForm(f=>({...f,patientUhid:p.uhid,patientName:p.name})); setTaskPatientSearch(""); }}>
                       <div>
-                        <span style={{ fontWeight:600, color: isDark?"#e2e8f0":"#1e293b" }}>{p.name}</span>
+                        <span style={{ fontWeight:600, color:isDark?"#e2e8f0":"#1e293b" }}>{p.name}</span>
                         <span style={{ marginLeft:8, color:"#64748b", fontSize:10 }}>{p.uhid}</span>
                       </div>
                       <div style={{ display:"flex", gap:5, alignItems:"center" }}>
-                        <span style={{ fontSize:9, padding:"2px 6px", borderRadius:10, background:p.status==="Admitted"?"#34d39918":"#6b728018", color:p.status==="Admitted"?"#34d399":"#6b7280", border:`1px solid ${p.status==="Admitted"?"#34d39940":"#6b728040"}` }}>{p.status}</span>
+                        <span style={{ fontSize:9, padding:"2px 6px", borderRadius:10, background:p.status==="Admitted"?"#0ea5e918":"#6b728018", color:p.status==="Admitted"?"#0ea5e9":"#6b7280", border:`1px solid ${p.status==="Admitted"?"#0ea5e940":"#6b728040"}` }}>{p.status}</span>
                         <span style={{ fontSize:9, color:"#64748b" }}>{p.branch}</span>
                       </div>
                     </div>
@@ -1307,7 +1254,6 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
                 </div>
               </>
             )}
-
             <div className="hms-modal-foot">
               <button className="hms-cancel-btn" onClick={()=>{setShowTaskModal(false);setEditTask(null);}}>Cancel</button>
               <button className="hms-save-btn" onClick={saveTask}>{editTask?"Update Task":"Assign Task"}</button>
@@ -1317,7 +1263,7 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
       )}
 
       {/* ══ DEPARTMENT MODAL ══ */}
-      {showDeptModal && (
+      {showDeptModal&&(
         <div className="hms-modal-overlay" onClick={e=>e.target===e.currentTarget&&setShowDeptModal(false)}>
           <div className="hms-modal-box" style={{ width:420 }}>
             <div className="hms-modal-title">Create New Department</div>
@@ -1336,16 +1282,13 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
       )}
 
       {/* ══ EMPLOYEE MODAL ══ */}
-      {showEmpModal && (
+      {showEmpModal&&(
         <div className="hms-modal-overlay" onClick={e=>e.target===e.currentTarget&&(setShowEmpModal(false),setEmpPassErr(""))}>
           <div className="hms-modal-box" style={{ width:520 }}>
             <div className="hms-modal-title">Create New Employee</div>
             <div className="hms-g2">
               {[["Full Name","fullName","text","Jane Doe"],["Username","username","text","jane.doe"],["Employee ID","empId","text","EMP-001"],["Email","email","email","jane@hospital.com"],["Phone","phone","tel","+91 98765 43210"],["Role","role","text","Staff / HOD / etc."]].map(([lbl,k,type,ph])=>(
-                <div key={k}>
-                  <label className="hms-lbl">{lbl}</label>
-                  <input type={type} placeholder={ph} value={empForm[k]} className="hms-inp" onChange={e=>{setEmpForm(f=>({...f,[k]:e.target.value}));setEmpPassErr("");}}/>
-                </div>
+                <div key={k}><label className="hms-lbl">{lbl}</label><input type={type} placeholder={ph} value={empForm[k]} className="hms-inp" onChange={e=>{setEmpForm(f=>({...f,[k]:e.target.value}));setEmpPassErr("");}}/></div>
               ))}
             </div>
             <label className="hms-lbl">Department</label>
@@ -1354,8 +1297,7 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
             </select>
             <div className="hms-g2">
               {[["Password","password",empShowPass,setEmpShowPass],["Confirm Password","confirmPassword",empShowConfirm,setEmpShowConfirm]].map(([lbl,k,show,setShow])=>(
-                <div key={k}>
-                  <label className="hms-lbl">{lbl}</label>
+                <div key={k}><label className="hms-lbl">{lbl}</label>
                   <div className="hms-pass-wrap">
                     <input type={show?"text":"password"} placeholder="••••••••" value={empForm[k]} className="hms-inp" style={{ paddingRight:50 }} onChange={e=>{setEmpForm(f=>({...f,[k]:e.target.value}));setEmpPassErr("");}}/>
                     <button type="button" className="hms-pass-toggle" onClick={()=>setShow(p=>!p)}>{show?"HIDE":"SHOW"}</button>
@@ -1363,7 +1305,7 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
                 </div>
               ))}
             </div>
-            {empPassErr && <div className="hms-err-text">{empPassErr}</div>}
+            {empPassErr&&<div className="hms-err-text">{empPassErr}</div>}
             <div className="hms-modal-foot">
               <button className="hms-cancel-btn" onClick={()=>{setShowEmpModal(false);setEmpPassErr("");}}>Cancel</button>
               <button className="hms-save-btn" onClick={saveEmployee}>Create Employee</button>
@@ -1373,25 +1315,21 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
       )}
 
       {/* ══ MED DRAWER ══ */}
-      {showMedModal && editMedPt && (
+      {showMedModal&&editMedPt&&(
         <MedDrawer editMedPt={editMedPt} onClose={()=>{setShowMedModal(false);setEditMedPt(null);}} updateMed={updateMed} addMedRow={addMedRow} delMedRow={delMedRow} saveMeds={saveMeds} fmt={fmt} canEditRate={true}/>
       )}
 
       {/* ══ VIEW SUMMARY MODAL ══ */}
-      {showViewModal && viewPt && (
+      {showViewModal&&viewPt&&(
         <div className="hms-modal-overlay" onClick={e=>e.target===e.currentTarget&&(setShowViewModal(false),setViewPt(null))}>
           <div className="hms-modal-box" style={{ width:640 }}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:16 }}>
-              <div>
-                <div className="hms-modal-title">Discharge Summary</div>
-                <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                  <SummaryPill type={viewPt.dischargeSummary?.type}/>
-                  <span className="hms-td-mono">{viewPt.uhid}</span>
-                </div>
+              <div><div className="hms-modal-title">Discharge Summary</div>
+                <div style={{ display:"flex", alignItems:"center", gap:8 }}><SummaryPill type={viewPt.dischargeSummary?.type}/><span className="hms-td-mono">{viewPt.uhid}</span></div>
               </div>
-              <button className="hms-logout-btn" onClick={()=>{setShowViewModal(false);setViewPt(null);}}>✕</button>
+              <button className="hms-cancel-btn" onClick={()=>{setShowViewModal(false);setViewPt(null);}}>✕</button>
             </div>
-            <div className="hms-stat-card" style={{ padding:"12px 14px", marginBottom:14, border:"1px solid #f59e0b18" }}>
+            <div className="hms-stat-card" style={{ padding:"12px 14px", marginBottom:14, border:`1px solid ${accent}18` }}>
               <div style={{ display:"flex", gap:14, flexWrap:"wrap" }}>
                 {[["Patient",viewPt.patientName||viewPt.name],["Age/Gender",`${viewPt.ageYY||viewPt.age}Y / ${viewPt.gender}`],["Blood Group",viewPt.bloodGroup||"—"],["Phone",viewPt.phone||"—"],["Admit Date",fmtDt(viewPt.admissions?.[0]?.dateTime)]].map(([k,v])=>(
                   <div key={k}><div className="hms-view-key">{k}</div><div className="hms-view-val" style={{ fontWeight:700 }}>{v}</div></div>
@@ -1402,22 +1340,18 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
             {[["Diagnosis",viewPt.dischargeSummary?.diagnosis],["Treatment",viewPt.dischargeSummary?.treatment],["Treating Doctor",viewPt.dischargeSummary?.doctorName],["Discharge Date",fmtDt(viewPt.dischargeSummary?.date)],["Expected DOD",fmtDt(viewPt.dischargeSummary?.expectedDod)],["Follow-up",viewPt.dischargeSummary?.followUp],["Notes",viewPt.dischargeSummary?.notes]].map(([k,v])=>(
               <div key={k} className="hms-view-row"><div className="hms-view-key">{k}</div><div className="hms-view-val" style={{ color:v&&v!=="—"?"inherit":"#64748b", fontStyle:v&&v!=="—"?"normal":"italic" }}>{v||"Not set"}</div></div>
             ))}
-            {(viewPt.medicines||[]).length>0 && <>
-              <div className="hms-section-label" style={{ marginTop:14 }}>Medicines</div>
+            {(viewPt.medicines||[]).length>0&&<><div className="hms-section-label" style={{ marginTop:14 }}>Medicines</div>
               <TableWrap heads={["Medicine","Qty","Rate","Total"]}>
                 {(viewPt.medicines||[]).map((m,i)=>(
                   <tr key={i}><Td hi>{m.name}</Td><Td><Badge col={accent}>{m.qty}</Badge></Td><Td>{fmt(m.rate)}</Td><Td><span style={{ color:"#f59e0b", fontWeight:700 }}>{fmt(m.qty*m.rate)}</span></Td></tr>
                 ))}
-              </TableWrap>
-            </>}
-            {(viewPt.reports||[]).length>0 && <>
-              <div className="hms-section-label" style={{ marginTop:14 }}>Investigations</div>
+              </TableWrap></>}
+            {(viewPt.reports||[]).length>0&&<><div className="hms-section-label" style={{ marginTop:14 }}>Investigations</div>
               <TableWrap heads={["Report","Date","Result"]}>
                 {(viewPt.reports||[]).map((r,i)=>(
                   <tr key={i}><Td hi>{r.name}</Td><Td sm>{r.date}</Td><Td>{r.result}</Td></tr>
                 ))}
-              </TableWrap>
-            </>}
+              </TableWrap></>}
             <div className="hms-modal-foot">
               <button className="hms-cancel-btn" onClick={()=>{setShowViewModal(false);setViewPt(null);}}>Close</button>
               <ActionBtn col={accent} onClick={()=>{setShowViewModal(false);openSummaryEditor(viewPt);}}>✎ Edit</ActionBtn>
@@ -1428,7 +1362,7 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
       )}
 
       {/* ══ EDIT SUMMARY MODAL ══ */}
-      {showSummaryModal && editSumPt && (
+      {showSummaryModal&&editSumPt&&(
         <div className="hms-modal-overlay" onClick={e=>e.target===e.currentTarget&&(setShowSummaryModal(false),setEditSumPt(null))}>
           <div className="hms-modal-box" style={{ width:520 }}>
             <div className="hms-modal-title">Edit Discharge Summary — {editSumPt.patientName||editSumPt.name}</div>
@@ -1458,7 +1392,7 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
       )}
 
       {/* ══ DELETE CONFIRM ══ */}
-      {showDeleteConfirm && deletePt && (
+      {showDeleteConfirm&&deletePt&&(
         <div className="hms-modal-overlay" onClick={e=>e.target===e.currentTarget&&(setShowDeleteConfirm(false),setDeletePt(null))}>
           <div className="hms-modal-box" style={{ width:380 }}>
             <div className="hms-modal-title" style={{ color:"#f87171" }}>Clear Discharge Summary?</div>
@@ -1474,12 +1408,12 @@ export default function ManagementAdminDashboard({ currentUser, onLogout }) {
       )}
 
       {/* ══ REPORTS MODAL ══ */}
-      {showReportModal && editRepPt && (
+      {showReportModal&&editRepPt&&(
         <div className="hms-modal-overlay" onClick={e=>e.target===e.currentTarget&&(setShowReportModal(false),setEditRepPt(null))}>
           <div className="hms-modal-box" style={{ width:520 }}>
             <div className="hms-modal-title">Reports — {editRepPt.patientName||editRepPt.name}</div>
             <div className="hms-section-label">Existing Reports</div>
-            {!(editRepPt.reports||[]).length && <div className="hms-empty" style={{ padding:"1rem" }}>No reports yet.</div>}
+            {!(editRepPt.reports||[]).length&&<div className="hms-empty" style={{ padding:"1rem" }}>No reports yet.</div>}
             {(editRepPt.reports||[]).map((r,i)=>(
               <div key={i} style={{ display:"grid", gridTemplateColumns:"1fr 110px 1fr 28px", gap:6, marginBottom:6, alignItems:"center" }}>
                 <input className="hms-inp-sm" placeholder="Report name" value={r.name} onChange={e=>updateReport(i,"name",e.target.value)}/>
