@@ -44,15 +44,18 @@ export default function LoginPage({ onLogin }) {
     setForgotError('');
     if (!forgotEmail) return setForgotError('Please enter your email.');
     try {
-      const res = await fetch('/api/auth/forgot-password', {
+      const res = await fetch('http://localhost:8000/api/users/request-reset-otp/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: forgotEmail }),
       });
       if (res.ok) setForgotSent(true);
-      else setForgotError('Email not found. Please try again.');
+      else {
+        const data = await res.json().catch(() => ({}));
+        setForgotError(data.error || 'Email not found. Please try again.');
+      }
     } catch {
-      setForgotSent(true);
+      setForgotError('Unable to reach the password reset service.');
     }
   };
 
@@ -88,7 +91,7 @@ export default function LoginPage({ onLogin }) {
             <div style={{ fontSize:13, color:'#6b7280', marginBottom:20 }}>Enter your registered email and we'll send you a reset link.</div>
             {forgotSent ? (
               <div style={{ background:'#f0fdf4', border:'1px solid #86efac', color:'#166534', borderRadius:8, padding:'12px 14px', fontSize:13 }}>
-                ✅ Reset link sent to <strong>{forgotEmail}</strong>. Check your inbox.
+                ✅ OTP sent to <strong>{forgotEmail}</strong>. Check your inbox and continue the reset flow.
               </div>
             ) : (
               <form onSubmit={handleForgot}>

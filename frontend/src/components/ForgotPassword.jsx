@@ -32,7 +32,7 @@ export default function ForgotPassword({ onBack }) {
   if (sent) {
     return (
       <div>
-        <p>Password reset link sent to <strong>{email}</strong>. Check your inbox.</p>
+        <p>Password reset OTP sent to <strong>{email}</strong>. Check your inbox.</p>
         <button onClick={onBack}>Back to Login</button>
       </div>
     );
@@ -49,7 +49,7 @@ export default function ForgotPassword({ onBack }) {
           onChange={(e) => setEmail(e.target.value)}
         />
         {error && <p style={{ color: "red" }}>{error}</p>}
-        <button type="submit">Send Reset Link</button>
+        <button type="submit">Send OTP</button>
       </form>
       <button onClick={onBack}>Back to Login</button>
     </div>
