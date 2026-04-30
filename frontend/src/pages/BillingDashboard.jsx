@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 
 const CURRENT_USER = { name: "Priya Sharma", empId: "EMP-2041" };
 
-const INSURANCE_TYPES = ["ECHS", "ECI", "FCI", "Ayushman Bharat", "Northern Railways", "TPA", "Self Pay", "Cash"];
+const INSURANCE_TYPES = ["ECHS", "ECI", "FCI", "Ayushman Bharat", "Northern Railways", "TPA", "Cash"];
 const TPA_DOCS = [
   { id: "final_bill",        label: "Final Bill",          ico: "🧾" },
   { id: "prescription",      label: "Prescription",        ico: "📝" },
